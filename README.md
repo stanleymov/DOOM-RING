@@ -125,13 +125,13 @@ action plus a controller button.
 | Settings window | F1 | View / Create |
 
 **Controller notes**
-- Xbox pads work directly. PlayStation pads work through Steam Input, and PlayStation icons show
-  when a Sony pad is connected.
-- The HUD and the settings window switch to button icons as soon as you use the pad.
+- Xbox controllers work directly. PlayStation controllers work through Steam Input, and PlayStation
+  icons show when a Sony controller is connected.
+- The HUD and the settings window switch to button icons as soon as you use the controller.
 - **Turn off** ELDEN RING's *System > Camera > "Camera Auto Rotation"* and *"Auto Wall Recovery"*:
   with them on, the controller camera feels uneven with the Doom movement.
-- Click into the game window once after it starts; the Windows cursor can block the pad until it
-  hides.
+- Click into the game window once after it starts; the Windows cursor can block the controller until
+  it hides.
 
 ## The settings window (F1)
 
