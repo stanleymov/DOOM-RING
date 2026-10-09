@@ -1,0 +1,10 @@
+[package]
+name = "doomring_setup"
+version = "1.1.0"
+edition = "2021"
+
+[dependencies]
+
+[profile.release]
+opt-level = "s"
+strip = true

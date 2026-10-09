@@ -1,0 +1,85 @@
+# ERFPS (Ver.2) configuration.
+# This config may be edited at runtime, with changes affecting the live game.
+# Do not remove any fields!
+
+[fov]
+# Horizontal field of view (in degrees) in first person.
+# Possible value range: 45.0 - 130.0
+horizontal_fov = 90.0
+
+# Correction of distortion caused by high FOV.
+# These options reduce FOV distortion and may improve depth perception in first person.
+# Possible values: "none", "fisheye", "barrel"
+fov_correction = "barrel"
+
+# The strength of FOV correction.
+# Larger values may introduce visible radial curvature and a reduction in image quality.
+# Possible value range: 0.0 - 1.0
+fov_correction_strength = 0.55
+
+# The aspect ratio correction strength for "barrel" fov_correction.
+# Larger values reduce horizontal stretch and increase vertical stretch.
+# Possible value range: 0.0 - 1.0
+fov_correction_cylindricity = 1.0
+
+[gameplay]
+# When starting up the game and loading a character the camera will start out in first person.
+start_in_first_person = true
+
+# When first entering first person during a session a mod tutorial will be shown once.
+show_tutorial = true
+
+# Locking on to enemies in first person does not restrict camera movement.
+# The default "hard" lock on aims the camera at the targeted enemy.
+soft_lock_on = false
+
+# When an enemy is on screen lock on will be prioritized to switching perspectives.
+prioritize_lock_on = true
+
+# Some animations (like attacks) allow for freer directional movement in first person.
+unlocked_movement = true
+
+# The player's body is made transparent during dodges, improving visibility.
+unobtrusive_dodges = false
+
+# Camera movement will be synchronized with head movement for dodges.
+track_dodges = false
+
+# Camera movement will be synchronized with head movement when the player is damaged.
+track_damage = false
+
+# Initial sprinting direction is restricted to moving forward.
+restricted_sprint = false
+
+[player]
+# Scales the player's height (first person only).
+# The player is assumed to be about 170cm (5'7") tall by default.
+# Possible value range: 0.95 - 1.05
+height_multiplier = 1.0
+
+[stabilizer]
+# Stabilization of camera movement in first person.
+enabled = true
+
+# The time period (in fractions of a second) to sample camera positions.
+# Larger values result in smoother camera movement but make it slower to adjust.
+# Possible value range: 0.1 - 1.0
+smoothing_window = 0.3
+
+# The strength of camera smoothing.
+# Larger values result in smoother camera movement but also separate it from the player's.
+# Possible value range: 0.0 - 1.0
+smoothing_factor = 0.8
+
+[crosshair]
+# Crosshair in first person.
+# Possible values: "none", "cross", "dot", "circle", "circledot", "angled"
+kind = "dot"
+
+# The horizontal scale of the crosshair reticle.
+# Possible value range: 0.1 - 4.0
+scale_x = 1.2
+
+# The vertical scale of the crosshair reticle.
+# Possible value range: 0.1 - 4.0
+scale_y = 1.2

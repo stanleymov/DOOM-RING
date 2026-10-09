@@ -1,0 +1,8 @@
+[book]
+authors = ["Andrea Venuta"]
+language = "en"
+src = "src"
+title = "hudbook"
+
+[build]
+build-dir = "../target/hudbook"

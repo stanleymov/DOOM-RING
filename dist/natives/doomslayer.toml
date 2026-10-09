@@ -1,0 +1,151 @@
+# DOOM RING tuning - edits apply live (checked every second)
+enemy_hp_mult = 2.0        # applied once at boot
+weapon_damage_mult = 0.5   # live
+move_speed_mult = 1.35
+doom_move = true        # Doom ground movement (instant accel, own jump)
+ground_speed = 9.0
+ground_accel = 80.0
+ground_friction = 70.0
+jump_height = 2.0           # normal jump height (m, live)
+dash_distance = 6.0
+dash_time = 0.16
+dash_recharge = 0.5         # seconds per dash charge (they refill one after the other)
+double_jump_height = 2.3
+air_gravity = 24.0
+double_jump_push = 5.5
+air_control = 3.5
+stagger_hp_frac = 0.2
+glory_range = 10.0
+glory_teleport = false       # glory kills teleport you to the demon at ground level (false = the old lunge)
+glory_tp_dist = 2.0           # teleport glory kills: how far in front of the demon you land (m)
+glory_hold = 0.20             # teleport glory kills: seconds you stay at the demon after the kill
+glory_jab_time = 0.25         # glory kills: seconds the left jab plays before the finishing hook
+ballista_aim_look = 0.7      # mouse speed while aiming the Ballista (right click), x normal (1 = unchanged)
+glory_heavy_hp = 1500.0       # chainsaw: no chainsaw kills on enemies with base (unscaled) HP at or above this
+switch_fire_delay = 0.3       # seconds after a weapon switch before the new gun can fire
+land_cam_time = 0.0           # LANDING CAM LOCK (was "part 2"): camera skips the stair smoothing this long after a landing; off (jittered landing on stairs)
+land_settle = true            # LANDING SETTLE (was "part 1"): body comes down the last ~35 cm at fall speed after a real landing
+land_min_drop = 0.8           # a real landing = a jump, or a drop over this many m (stair steps stay under it)
+uphill_jump_boost = 0.0       # jumping uphill: extra lift = this x how fast the ground ahead rises (0 = none)
+land_bounce = [0.06, 0.06, 0.22]   # LANDING DIP (Doom): [max depth m, seconds down, seconds back up]
+# solid_plants = ["AEG801_254", "AEG801_255"]   # plant models that block you anyway (big trees); names from the log ("walk-through plant ...")
+solid_plants = []              # (big trees solid: off for now - ER fades trees near the camera; see line above)
+glory_heal_frac = 0.15
+chainsaw_range = 3.0
+chainsaw_fov = 0.65            # chainsaw framing (Doom's own 0.65; lower = tighter, less hand)
+crucible_range = 6.0           # Crucible reach (m) to the enemy's body; live
+crucible_swing_speed = 0.7     # Crucible swing animation speed (1 = as baked); live
+crucible_hp = 1900.0          # Crucible cost: base HP under this = 1 charge, under 2x = 2, else 3 (settings: CRUCIBLE HIT DAMAGE); live
+level_damage = 0.01           # level scaling: +1% Doom damage per character level above level_base, -1% below (WEAPON DAMAGE multiplies on top); chainsaw limit + CRUCIBLE HIT DAMAGE follow in steps of 100; live
+level_base = 9                # damage reference level: x1.0 here (the Doomslayer class starts at 9); live
+unstick_height = 4.0          # F8 (unstick): metres lifted per press; live
+armor_max = 200
+max_health = 0              # health max (shield extra); the game's max HP is scaled to it, 0 = game's own
+armor_absorb = 1.0           # share of each hit the armor takes (1.0 = all of it until it's gone)
+infinite_ammo = false
+volume = 0.5               # Doom sound effects
+music = true               # Doom combat music during fights
+music_volume = 0.2
+music_hold = 8.0             # seconds without any sign of a fight before the music fades
+show_hud = true               # the Doom HUD (off: only crosshair, scope and interact prompt stay)
+glory_kills = true            # glory kills (off: damage does not stop at the stagger, enemies just die)
+bridge = false
+hide_body = true          # hide Elden Ring body/arms/weapons (shadow stays)
+
+meathook_range = 30.0         # Super Shotgun meathook (right click)
+meathook_speed = 28.0
+
+# 3D viewmodel (Doom arms + guns)
+vm_fov = 55.0
+vm_offset = [0.0, 0.0, 0.0]   # view-space metres: right, up, forward
+vm_pitch = 0.0
+vm_light = 1.6
+vm_ambient = 0.35
+vm_env = 0.35
+vm_arms = true
+vm_debug = 0
+vm_msaa = 4                   # gun anti-aliasing: 0 off, 2, 4, 8 (live)
+vm_fxaa = false                # gun edge smoothing (FXAA), live; false = off
+sway = [5.0, 0.004, 0.005, 0.011]  # weapon sway (live): tilt deg, trail m, jump lift m, landing dip m; 0 = off
+bob = [0.2, 0.2, 1.0]   # walking bob (live): height, sideways, speed; 1 = old quarter-of-Doom bob
+bob_tip = [0.8, 1.0]   # walking bob of the tip (live): side swing deg, nod deg; the gun pivots at its visible back end
+bob_noise = 0.5        # walking bob variation (live): 0 = every step the same, 0.3 = up to ~30% size/pace change per step
+bob_mode = 1            # walking bob (live): 0 = ours (bob, bob_tip, bob_noise above), 1 = Doom's own per-gun weaponBob
+doom_bob = [1.0, 1.0, 1.0, 1.0]       # Doom bob (live): movement size, rotation size, step speed, pivot (0 = camera, 1 = gun's visible back end)
+doom_bob_move = [1.0, 1.0, 1.0]       # Doom bob movement parts (live, 1 = Doom): forward/back, side, up/down
+doom_bob_rot = [1.0, 1.0, 1.0]        # Doom bob rotation parts (live, 1 = Doom): pitch (nod), yaw (side swing), roll (tilt)
+aim_steady = 0.25       # bob + sway while aiming (Ballista right click, scopes), live: 1 = unchanged
+melee_fov = 1.0         # fists framing, live: lower = tighter (hides the shoulder on punches)
+melee_arm_push = 17.0      # melee, live: cm each arm is pushed out to its side (hides the shoulder end on punches)
+
+hide_er_hud = true            # Doom HUD replaces ER health/FP/stamina + quick slots (boss bars stay)
+wheel_slowmo = 0.25           # game speed while the weapon wheel is open
+
+music_skip = []
+[keys]   # Windows virtual-key codes
+fire = 0x01
+alt_fire = 0x02
+dash = 0xA0
+jump = 0x20
+melee = 0x46
+chainsaw = 0x43
+flame_belch = 0x47
+weapon_wheel = 0x51
+last_weapon = 0         # (quick swap = tap the weapon wheel key; X freed)
+slots = [0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38]
+doom_toggle = 0x78   # F9: Doom layer off/on (plain Elden Ring)
+unstick = 0x77           # F8: stuck in a wall/floor -> lift 2 m per press
+mark = 0x5A              # Z: give the enemy under the crosshair a health bar (again = remove)
+melee_alt = 0x05       # mouse back
+chainsaw_alt = 0x00    # (V is the Crucible now)
+crucible = 0x56        # V: draw / put away the Crucible
+flame_belch_alt = 0x06 # mouse forward
+
+# Doom HUD, every element live: name = [move x, move y, scale, opacity]
+# (1080p px; + x = right, + y = down; scale about the element's own spot; rows carry their parts)
+
+fire_alt = 0x00
+alt_fire_alt = 0x00
+dash_alt = 0x00
+jump_alt = 0x00
+weapon_wheel_alt = 0x04
+mark_alt = 0x00
+doom_toggle_alt = 0x00
+unstick_alt = 0x00
+settings = 0x70
+settings_alt = 0x00
+
+crucible_alt = 0x00
+
+fire_pad = 0x211
+alt_fire_pad = 0x210
+dash_pad = 0x20D
+jump_pad = 0x20C
+melee_pad = 0x207
+chainsaw_pad = 0x208
+flame_belch_pad = 0x20F
+crucible_pad = 0x200
+weapon_wheel_pad = 0x209
+mark_pad = 0x201
+doom_toggle_pad = 0x203
+unstick_pad = 0x202
+settings_pad = 0x205
+interact_pad = 0x20E
+
+# HUD tuning is baked into the build (doomslayer/src/hud_baked.toml); `python tools/hud_bake.py live` brings it back here.
+
+[sound_db]   # per-sound volume in dB on top of the files (live). Any sound folder name works; a sound not listed = 0 dB.
+shotgun_fire = -2.5     # Combat Shotgun
+sticky_fire = -1.0      # sticky bomb launch
+sticky_explode = 4.0    # sticky bomb explosion
+hc_bolt_fire = 6.5      # Precision Bolt
+heavy_cannon_fire = 2.0 # Heavy Cannon
+plasma_fire = -1.0      # Plasma Rifle shot
+flame_belch = -1.5      # Flame Belch
+rocket_fire = -1.5      # Rocket Launcher
+ssg_fire = 6.0          # Super Shotgun
+ballista_fire = -2.0    # Ballista
+arb_fire = 0.0          # Arbalest
+bfg_fire = 1.5          # BFG shot
+bfg_explode = 6.0       # BFG explosion
+rocket_explode = 4.0    # rocket explosion

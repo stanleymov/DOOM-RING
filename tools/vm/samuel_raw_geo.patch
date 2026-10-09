@@ -1,0 +1,28 @@
+diff --git a/source/core/ExportModel.cpp b/source/core/ExportModel.cpp
+index 0b01ced..5257459 100644
+--- a/source/core/ExportModel.cpp
++++ b/source/core/ExportModel.cpp
+@@ -1,3 +1,5 @@
++#include <fstream>
++#include <cstdlib>
+ #include "ExportModel.h"
+ 
+ namespace HAYDEN
+@@ -436,6 +438,17 @@ namespace HAYDEN
+             }
+         }
+ 
++        // doom-ring: SAMUEL_RAW_GEO=1 also writes the md6 header and the decompressed geometry
++        // (skin weights included) next to the export, for tools/vm/md6mesh.py.
++        if (std::getenv("SAMUEL_RAW_GEO") && modelType == 31)
++        {
++            std::string fn = _FileName;
++            for (auto& c : fn) if (c == '/' || c == ' ' || c == '$' || c == ':') c = '_';
++            fs::create_directories(exportPath);
++            std::ofstream((exportPath / (fn + ".md6hdr")).string(), std::ios::binary).write((const char*)binaryData.data(), binaryData.size());
++            std::ofstream((exportPath / (fn + ".md6geo")).string(), std::ios::binary).write((const char*)modelData.data(), modelData.size());
++        }
++
+         // FOR DEBUGGING ONLY - EXPORT RAW BINARIES AND ABORT
+         // writeToFilesystem(binaryData, exportPath);
+         // writeToFilesystem(modelData, exportPath);

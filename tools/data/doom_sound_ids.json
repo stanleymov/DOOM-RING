@@ -1,0 +1,1901 @@
+{
+ "music": {
+  "102428052": "mars_core_music_phobos_main_heavy_6",
+  "1026861081": "samuelsbase_music_main_heavy_2",
+  "1028292115": "doom_hunter_music_main_heavy_18",
+  "1029286285": "metal_hell_music_main_heavy_0",
+  "1041435673": "doom_hunter_music_main_heavy_1",
+  "1044804236": "supergorenest_music_sgn_combat_suite_1_main_heavy_3",
+  "1046828338": "doom_hunter_music_main_heavy_6",
+  "105291109": "supergorenest_music_sgn_combat_suite_1_main_heavy_2",
+  "1059057987": "samuelsbase_music_main_heavy_3",
+  "1064882881": "metal_hell_music_main_heavy_6",
+  "1066428213": "slayer_city_music_main_heavy_3",
+  "127528731": "cultist_base_music_main_heavy_3",
+  "12922654": "cultist_base_music_main_heavy_5",
+  "129625007": "hub_music_hub_main_heavy_11",
+  "135162607": "cultist_base_music_main_heavy_6",
+  "141223707": "samuelsbase_music_main_heavy_9",
+  "146442223": "metal_hell_music_main_heavy_22",
+  "147655635": "metal_hell_music_main_heavy_17",
+  "15098487": "samuelsbase_music_main_heavy_0_0",
+  "151824363": "samuelsbase_music_main_heavy_14",
+  "152345172": "cultist_base_music_main_heavy_12",
+  "153491788": "supergorenest_music_sgn_combat_suite_1_main_heavy_20",
+  "153899155": "metal_hell_music_main_heavy_21",
+  "156134790": "cultist_base_music_main_heavy_0",
+  "157435307": "metal_hell_music_main_heavy_20",
+  "158199827": "hub_music_hub_main_heavy_0",
+  "175943267": "mars_core_music_phobos_main_heavy_1",
+  "2051011": "metal_hell_music_main_heavy_13",
+  "210322490": "slayer_city_music_main_heavy_5",
+  "212090131": "supergorenest_music_sgn_combat_suite_1_main_heavy_15",
+  "217467181": "slayer_city_music_main_heavy_16",
+  "231462430": "doom_hunter_music_main_heavy_5",
+  "23276571": "slayer_city_music_main_heavy_4",
+  "236338651": "supergorenest_music_sgn_combat_suite_1_main_heavy_22",
+  "249285629": "samuelsbase_music_main_heavy_10",
+  "250397638": "supergorenest_music_sgn_combat_suite_1_main_heavy_6",
+  "272617257": "supergorenest_music_sgn_combat_suite_1_main_heavy_19",
+  "282034845": "supergorenest_music_sgn_combat_suite_1_main_heavy_26",
+  "288705471": "doom_hunter_music_main_heavy_15",
+  "288842289": "mars_core_music_phobos_main_heavy_5_0",
+  "293601360": "supergorenest_music_sgn_combat_suite_1_main_heavy_14",
+  "298270430": "hub_music_hub_main_heavy_9",
+  "298522919": "slayer_city_music_main_heavy_11",
+  "29895328": "supergorenest_music_sgn_combat_suite_1_main_heavy_27",
+  "304015661": "cultist_base_music_main_heavy_8",
+  "306248850": "cultist_base_music_main_heavy_1",
+  "314738262": "metal_hell_music_main_heavy_10",
+  "31616491": "supergorenest_music_sgn_combat_suite_1_main_heavy_11",
+  "316265514": "hub_music_hub_main_heavy_5",
+  "316751112": "supergorenest_music_sgn_combat_suite_1_main_heavy_10",
+  "332784176": "doom_hunter_music_main_heavy_13",
+  "357636133": "supergorenest_music_sgn_combat_suite_1_main_heavy_21",
+  "357653108": "doom_hunter_music_main_heavy_9",
+  "357857007": "supergorenest_music_sgn_combat_suite_1_main_heavy_13",
+  "371667681": "doom_hunter_music_main_heavy_0",
+  "374659681": "slayer_city_music_main_heavy_9",
+  "374814138": "supergorenest_music_sgn_combat_suite_1_main_heavy_8",
+  "382174015": "mars_core_music_phobos_main_heavy_0",
+  "385943497": "metal_hell_music_main_heavy_7",
+  "42527711": "metal_hell_music_main_heavy_15",
+  "434779957": "slayer_city_music_main_heavy_12",
+  "441757026": "hub_music_hub_main_heavy_10",
+  "456684125": "supergorenest_music_sgn_combat_suite_1_main_heavy_28",
+  "460900557": "slayer_city_music_main_heavy_17",
+  "46745725": "supergorenest_music_sgn_combat_suite_1_main_heavy_16",
+  "475712097": "metal_hell_music_main_heavy_16",
+  "482702456": "supergorenest_music_sgn_combat_suite_1_main_heavy_24",
+  "491926508": "samuelsbase_music_main_heavy_13",
+  "500377646": "supergorenest_music_sgn_combat_suite_1_main_heavy_18",
+  "507207061": "doom_hunter_music_main_heavy_8",
+  "508967262": "metal_hell_music_main_heavy_23",
+  "512413902": "doom_hunter_music_main_heavy_11",
+  "541994509": "hub_music_hub_main_heavy_7",
+  "546472708": "slayer_city_music_main_heavy_0",
+  "548529071": "supergorenest_music_sgn_combat_suite_1_main_heavy_5",
+  "54987221": "metal_hell_music_main_heavy_4",
+  "553472824": "supergorenest_music_sgn_combat_suite_1_main_heavy_4",
+  "555315545": "hub_music_hub_main_heavy_8",
+  "578728366": "hub_music_hub_main_heavy_1",
+  "583481759": "cultist_base_music_main_heavy_4",
+  "592409461": "hub_music_hub_main_heavy_2",
+  "602592298": "supergorenest_music_sgn_combat_suite_1_main_heavy_0",
+  "61364545": "doom_hunter_music_main_heavy_4",
+  "61507720": "doom_hunter_music_main_heavy_3",
+  "635594029": "cultist_base_music_main_heavy_10",
+  "644506333": "slayer_city_music_main_heavy_14",
+  "65456254": "supergorenest_music_sgn_combat_suite_1_main_heavy_1",
+  "666608307": "metal_hell_music_main_heavy_19",
+  "669811339": "doom_hunter_music_main_heavy_10",
+  "674683335": "metal_hell_music_main_heavy_14",
+  "689242996": "supergorenest_music_sgn_combat_suite_1_main_heavy_23",
+  "705482065": "supergorenest_music_sgn_combat_suite_1_main_heavy_25",
+  "715953275": "metal_hell_music_main_heavy_8",
+  "737940233": "hub_music_hub_main_heavy_4",
+  "742802445": "slayer_city_music_main_heavy_7",
+  "743905040": "metal_hell_music_main_heavy_18",
+  "743928951": "samuelsbase_music_main_heavy_7",
+  "760497781": "hub_music_hub_main_heavy_12",
+  "763728488": "mars_core_music_phobos_main_heavy_4",
+  "774943004": "supergorenest_music_sgn_combat_suite_1_main_heavy_17",
+  "778655200": "cultist_base_music_main_heavy_11",
+  "783671064": "metal_hell_music_main_heavy_12",
+  "796670125": "mars_core_music_phobos_main_heavy_8",
+  "80055335": "cultist_base_music_main_heavy_9",
+  "817905033": "metal_hell_music_main_heavy_11",
+  "830515738": "slayer_city_music_main_heavy_15",
+  "848343071": "metal_hell_music_main_heavy_5",
+  "848812635": "hub_music_hub_main_heavy_3",
+  "850782500": "slayer_city_music_main_heavy_2_0",
+  "852528834": "doom_hunter_music_main_heavy_7",
+  "862645210": "slayer_city_music_main_heavy_6",
+  "875995318": "supergorenest_music_sgn_combat_suite_1_main_heavy_7",
+  "887589835": "doom_hunter_music_main_heavy_14",
+  "89618147": "slayer_city_music_main_heavy_8",
+  "906675450": "doom_hunter_music_main_heavy_2",
+  "918069367": "mars_core_music_phobos_main_heavy_2",
+  "930005873": "metal_hell_music_main_heavy_3",
+  "951434375": "metal_hell_music_main_heavy_9",
+  "958269654": "metal_hell_music_main_heavy_1",
+  "9621679": "supergorenest_music_sgn_combat_suite_1_main_heavy_29",
+  "967422100": "doom_hunter_music_main_heavy_12",
+  "975196290": "doom_hunter_music_main_heavy_19",
+  "985301789": "samuelsbase_music_main_heavy_5",
+  "987445542": "doom_hunter_music_main_heavy_16",
+  "993544341": "slayer_city_music_main_heavy_1"
+ },
+ "sfx": {
+  "1000439153": {
+   "name": "heavy_cannon_bolt_fire_7",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "1003505333": {
+   "name": "shotgun_pop_rocket_fire_4",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "1007637593": {
+   "name": "glory_punch_whoosh_4",
+   "snd": [
+    "sfx_patch_1"
+   ]
+  },
+  "101130193": {
+   "name": "wpn_sp_heavy_cannon_fire_13",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "1011529772": {
+   "name": "bloodpunch_dlc_hit_8",
+   "snd": [
+    "sfx",
+    "sfx_patch_3"
+   ]
+  },
+  "1015953581": {
+   "name": "shotgun_burst_fire_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "1018643057": {
+   "name": "pickup_ammo_generic",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "1019698610": {
+   "name": "cs_sticky_reload_1",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "1021104070": {
+   "name": "glory_huge_guts_explode_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "1023338004": {
+   "name": "crucible_movements_short_5",
+   "snd": [
+    "sfx",
+    "sfx_patch_1"
+   ]
+  },
+  "1027564873": {
+   "name": "heavy_cannon_zoom_out_5",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "1027576031": {
+   "name": "player_rocket_remote_explo_shockwave_7",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "1036935077": {
+   "name": "crucible_close",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "1039110967": {
+   "name": "cs_sticky_reload_passive_0",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "104193145": {
+   "name": "wpn_sp_shotgun_pump_in_1",
+   "snd": [
+    "sfx",
+    "sfx_patch_3"
+   ]
+  },
+  "1045788578": {
+   "name": "wpn_sp_shotgun_pump_in_8",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "1056305909": {
+   "name": "gauss_ballista_out_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "10581372": {
+   "name": "wpn_sp_shotgun_fire_end_8",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "1059039153": {
+   "name": "lock_on_fire_upgraded_4",
+   "snd": [
+    "sfx",
+    "sfx_patch_1"
+   ]
+  },
+  "1064102021": {
+   "name": "pop_rocket_explosion_8",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "1064615144": {
+   "name": "punch_flesh_3",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "1065297248": {
+   "name": "plasma_shot",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "107867385": {
+   "name": "eol_shotgun_double_fire_4",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "109464230": {
+   "name": "gauss_zoom_in",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "116338317": {
+   "name": "ui_grenade_frag_cooldown_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "116713474": {
+   "name": "chainsaw_impact_flesh_0",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "130526615": {
+   "name": "pop_rocket_explosion_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "131387644": {
+   "name": "chaingun_turret_open_03",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "131569407": {
+   "name": "shotgun_pop_rocket_fire_6",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "141816635": {
+   "name": "wpn_sp_shotgun_double_shells_out_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "142657113": {
+   "name": "gauss_charged_tone",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "143761575": {
+   "name": "wpn_sp_chaingun_fire_1",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "144368153": {
+   "name": "plasma_shot",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "151819929": {
+   "name": "glory_gore_bone_snap_5",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "156261599": {
+   "name": "chainsaw_impact_flesh_3",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "15648640": {
+   "name": "in_flight_mobility_6",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "165734207": {
+   "name": "gauss_ballista_out_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "167340194": {
+   "name": "bfg_charge_1",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "169559861": {
+   "name": "chainsaw_on_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "178378521": {
+   "name": "metal_climb_hit_32",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "178602919": {
+   "name": "ui_back",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "179157822": {
+   "name": "metal_climb_hit_94",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "184462253": {
+   "name": "lock_on_fire_upgraded_6",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "184795984": {
+   "name": "wpn_sp_rocket_launcher_fire_7",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "187939551": {
+   "name": "glory_punch_whoosh_6",
+   "snd": [
+    "sfx_patch_1"
+   ]
+  },
+  "188610048": {
+   "name": "low_ammo",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "192242795": {
+   "name": "pickup_ammo_chainsaw_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "192894989": {
+   "name": "plasma_heat_blast_fire_switch_2_3",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "194457941": {
+   "name": "player_rocket_remote_explo_shockwave_11",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "19500766": {
+   "name": "glory_crucible_slice_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "201549713": {
+   "name": "in_flight_mobility_11",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "206711753": {
+   "name": "player_dash2_4",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "207790389": {
+   "name": "glory_crucible_slice_24",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "208886685": {
+   "name": "wpn_sp_shotgun_double_shells_out_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "211372344": {
+   "name": "pickup_health_small",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "217159156": {
+   "name": "crucible_movements_short_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "218205515": {
+   "name": "metal_climb_hit_54",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "222575049": {
+   "name": "player_rocket_remote_explo_shockwave_9",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "232387363": {
+   "name": "chainsaw_impact_flesh_2",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "232495429": {
+   "name": "dash_recharge",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "235735898": {
+   "name": "wpn_sp_heavy_cannon_fire_6",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "240424480": {
+   "name": "metal_climb_hit_156",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "245839299": {
+   "name": "bfg_charge_4",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "247831175": {
+   "name": "shotgun_burst_fire_10",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "248894814": {
+   "name": "plasma_heat_blast_fire_switch_2_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "250808599": {
+   "name": "in_flight_mobility_19",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "251253790": {
+   "name": "chainsaw_out_of_range_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "251835206": {
+   "name": "eol_shotgun_double_fire_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "252179432": {
+   "name": "plasma_heat_blast_charged_alert",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "255721279": {
+   "name": "in_flight_mobility_23",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "262962564": {
+   "name": "normal_punch_4",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "268785562": {
+   "name": "bfg_charge_3",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "269689176": {
+   "name": "wpn_sp_chaingun_fire_0",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "269744783": {
+   "name": "pickup_armor_small",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "271294826": {
+   "name": "wpn_sp_chaingun_fire_11",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "273873497": {
+   "name": "normal_punch_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "28133355": {
+   "name": "gauss_ballista_into_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "281438921": {
+   "name": "crucible_movements_short_4",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "28148342": {
+   "name": "in_flight_mobility_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "285338708": {
+   "name": "glory_huge_guts_explode_2",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "287164168": {
+   "name": "glory_huge_guts_explode_7",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "291550339": {
+   "name": "in_flight_mobility_8",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "293899175": {
+   "name": "bloodpunch_dlc_hit_3",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "29658051": {
+   "name": "crucible_movements_short_3",
+   "snd": [
+    "sfx",
+    "sfx_patch_1"
+   ]
+  },
+  "29902951": {
+   "name": "heavy_cannon_dry_fire_3",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "31726854": {
+   "name": "shotgun_pop_rocket_fire_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "322846463": {
+   "name": "player_rocket_remote_explo_12",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "326127531": {
+   "name": "bfg_explosion_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "327037935": {
+   "name": "wpn_sp_shotgun_pump_in_7",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "330353103": {
+   "name": "shotgun_pop_rocket_fire_9",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "33193950": {
+   "name": "glory_gore_bone_snap_6",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "334743737": {
+   "name": "player_dash2_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "341817604": {
+   "name": "glory_crucible_slice_14",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "343189265": {
+   "name": "glory_gore_bone_snap_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "34439438": {
+   "name": "crucible_movements_short_1",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "345159574": {
+   "name": "wpn_shotgun_double_meathook_fire_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "3452440": {
+   "name": "glory_huge_guts_explode_9",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "345577966": {
+   "name": "plasma_heat_blast_charge_level_3",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "350872107": {
+   "name": "wpn_sp_rocket_launcher_fire_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "35401910": {
+   "name": "eol_shotgun_double_fire_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "362291714": {
+   "name": "player_rocket_remote_explo_shockwave_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "36331126": {
+   "name": "wpn_sp_chaingun_fire_13",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "363807703": {
+   "name": "heavy_cannon_zoom_out_0",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "363983724": {
+   "name": "bloodpunch_dlc_hit_0",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "364529099": {
+   "name": "player_rocket_explosion_7",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "366234780": {
+   "name": "plasma_heat_blast_fire_switch_1_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "369242519": {
+   "name": "wpn_sp_shotgun_double_shells_out_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "375374962": {
+   "name": "wpn_shotgun_double_meathook_fire_3",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "378333359": {
+   "name": "chaingun_turret_open_02",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "385958237": {
+   "name": "flame_belch_3",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "387956766": {
+   "name": "shotgun_pop_rocket_fire_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "389640398": {
+   "name": "ballista_explode_small_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "389756459": {
+   "name": "shotgun_pop_rocket_fire_5",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "389818622": {
+   "name": "wpn_sp_heavy_cannon_fire_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "393257712": {
+   "name": "in_flight_mobility_21",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "398873444": {
+   "name": "pop_rocket_explosion_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "409436245": {
+   "name": "crucible_no_energy",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "412024913": {
+   "name": "player_rocket_remote_explo_15",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "414436432": {
+   "name": "player_rocket_remote_explo_9",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "421590314": {
+   "name": "glory_gore_bone_snap_13",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "423672623": {
+   "name": "plasma_heat_blast_fire_switch_1_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "428917290": {
+   "name": "chainsaw_impact_flesh_1",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "429896072": {
+   "name": "wpn_sp_chaingun_fire_3",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "432522350": {
+   "name": "wpn_sp_shotgun_fire_end_5",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "432640766": {
+   "name": "wpn_sp_heavy_cannon_fire_4",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "438584367": {
+   "name": "glory_punch_whoosh_10",
+   "snd": [
+    "sfx_patch_1"
+   ]
+  },
+  "442755619": {
+   "name": "normal_punch_3",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "444315497": {
+   "name": "plasma_shot",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "450114886": {
+   "name": "plasma_heat_blast_charge_level_2",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "452523433": {
+   "name": "pop_rocket_ready_1",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "454056007": {
+   "name": "pop_rocket_explosion_7",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "458185254": {
+   "name": "meathook_impact_flesh_1",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "461049554": {
+   "name": "pop_rocket_explosion_11",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "464355671": {
+   "name": "heavy_cannon_dry_fire_10",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "464717406": {
+   "name": "wpn_sp_shotgun_pump_in_3",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "46809343": {
+   "name": "punch_flesh_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "481700482": {
+   "name": "normal_punch_5",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "481851097": {
+   "name": "glory_punch_whoosh_8",
+   "snd": [
+    "sfx_patch_1"
+   ]
+  },
+  "484162577": {
+   "name": "glory_huge_guts_explode_5",
+   "snd": [
+    "sfx",
+    "sfx_patch_3"
+   ]
+  },
+  "488607727": {
+   "name": "shotgun_pop_rocket_fire_8",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "489482641": {
+   "name": "glory_crucible_slice_22",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "499391168": {
+   "name": "gauss_ballista_into_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "501581093": {
+   "name": "plasma_shot",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "50270327": {
+   "name": "metal_climb_hit_87",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "505007268": {
+   "name": "glory_gore_bone_snap_12",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "508028728": {
+   "name": "player_rocket_explosion_5",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "511104637": {
+   "name": "glory_crucible_slice_13",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "518443726": {
+   "name": "wpn_sp_shotgun_fire_end_11",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "519216322": {
+   "name": "wpn_sp_shotgun_pump_in_2",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "519330560": {
+   "name": "glory_punch_whoosh_0",
+   "snd": [
+    "sfx_patch_1"
+   ]
+  },
+  "521076019": {
+   "name": "plasma_heat_blast_fire_switch_2_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "525338676": {
+   "name": "in_flight_mobility_4",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "526141833": {
+   "name": "pickup_ammo_chainsaw_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "526363942": {
+   "name": "player_rocket_remote_explo_8",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "52877357": {
+   "name": "bfg_charge_0",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "534370130": {
+   "name": "gauss_ballista_fire_5",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "538093362": {
+   "name": "punch_flesh_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "544380326": {
+   "name": "player_rocket_remote_explo_5",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "550754414": {
+   "name": "glory_gore_bone_snap_16",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "556753935": {
+   "name": "in_flight_mobility_16",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "559330229": {
+   "name": "armor_break",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "560762226": {
+   "name": "glory_huge_guts_explode_6",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "573064079": {
+   "name": "player_rocket_remote_explo_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "573682696": {
+   "name": "heavy_cannon_bolt_fire_5",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "576459938": {
+   "name": "plasma_heat_blast_fire_switch_1_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "586469972": {
+   "name": "shotgun_pop_rocket_fire_7",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "591719327": {
+   "name": "plasma_shot_5",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "598245479": {
+   "name": "shotgun_burst_fire_7",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "600408487": {
+   "name": "bfg_fire_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "603414299": {
+   "name": "lock_on_fire_upgraded_8",
+   "snd": [
+    "sfx",
+    "sfx_patch_1"
+   ]
+  },
+  "604022957": {
+   "name": "glory_punch_whoosh_14",
+   "snd": [
+    "sfx_patch_1"
+   ]
+  },
+  "605403239": {
+   "name": "wpn_sp_shotgun_double_shells_out_3",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "607984356": {
+   "name": "ballista_explode_small_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "615898415": {
+   "name": "glory_punch_whoosh_12",
+   "snd": [
+    "sfx_patch_1"
+   ]
+  },
+  "624593943": {
+   "name": "wpn_sp_shotgun_pump_in_9",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "62633453": {
+   "name": "flame_belch_ready",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "634725745": {
+   "name": "glory_gore_bone_snap_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "636017802": {
+   "name": "chaingun_turret_open_01",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "637044124": {
+   "name": "wpn_sp_shotgun_pump_in_4",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "639939389": {
+   "name": "chainsaw_on_3",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "64302662": {
+   "name": "wpn_sp_chaingun_fire_10",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "646195200": {
+   "name": "meathook_impact_flesh_0",
+   "snd": [
+    "sfx",
+    "sfx_patch_3"
+   ]
+  },
+  "648742867": {
+   "name": "shotgun_burst_fire_8",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "650632980": {
+   "name": "in_flight_mobility_29",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "655663293": {
+   "name": "glory_huge_guts_explode_8",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "660735102": {
+   "name": "player_rocket_remote_explo_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "661925391": {
+   "name": "heavy_cannon_dry_fire_0",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "662481019": {
+   "name": "player_rocket_remote_explo_13",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "66313900": {
+   "name": "plasma_heat_blast_fire_switch_3_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "671845664": {
+   "name": "cs_sticky_bomb_timer_1_mono",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "673219757": {
+   "name": "glory_gore_bone_snap_14",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "673628115": {
+   "name": "player_rocket_remote_explo_shockwave_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "681204477": {
+   "name": "gauss_ballista_fire_3",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "682420744": {
+   "name": "punch_flesh_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "682918061": {
+   "name": "wpn_sp_heavy_cannon_fire_7",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "683052012": {
+   "name": "glory_huge_guts_explode_3",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "685193332": {
+   "name": "heavy_cannon_dry_fire_8",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "688467889": {
+   "name": "cs_sticky_reload_passive_1",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "692109964": {
+   "name": "pop_rocket_ready_2",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "694875228": {
+   "name": "wpn_sp_shotgun_pump_in_6",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "70052513": {
+   "name": "plasma_heat_blast_fire_switch_1_4",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "709199027": {
+   "name": "flame_belch_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "711113775": {
+   "name": "wpn_sp_heavy_cannon_fire_5",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "714166092": {
+   "name": "wpn_sp_rocket_launcher_fire_8",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "714991203": {
+   "name": "wpn_sp_shotgun_pump_in_5",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "715119633": {
+   "name": "bfg_explosion_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "715193722": {
+   "name": "pickup_ammo_chainsaw_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "730304849": {
+   "name": "glory_gore_bone_snap_7",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "734677864": {
+   "name": "chainsaw_impact_flesh_4",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "735044348": {
+   "name": "plasma_heat_blast_charge_level_1",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "736234330": {
+   "name": "plasma_heat_blast_fire_switch_3_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "736423284": {
+   "name": "chainsaw_insufficient_fuel_3",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "750293886": {
+   "name": "pop_rocket_explosion_6",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "755458020": {
+   "name": "plasma_heat_blast_fire_switch_3_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "755532989": {
+   "name": "chainsaw_on_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "762372064": {
+   "name": "glory_punch_whoosh_16",
+   "snd": [
+    "sfx_patch_1"
+   ]
+  },
+  "764531269": {
+   "name": "player_rocket_remote_explo_14",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "765670525": {
+   "name": "heavy_cannon_dry_fire_7",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "766570417": {
+   "name": "player_dash2_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "768165285": {
+   "name": "wpn_shotgun_double_meathook_fire_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "768686864": {
+   "name": "gauss_base_fire_01",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "770762369": {
+   "name": "player_rocket_explosion_9",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "773837864": {
+   "name": "ammo_shells_rand_loud_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "774623480": {
+   "name": "wpn_sp_chaingun_fire_14",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "775210546": {
+   "name": "plasma_shot",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "775367616": {
+   "name": "chainsaw_impact_flesh_5",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "778633586": {
+   "name": "heavy_cannon_dry_fire_6",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "778847870": {
+   "name": "player_rocket_explosion_1",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "779717447": {
+   "name": "pop_rocket_explosion_4",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "783510688": {
+   "name": "chaingun_turret_close_5",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "793100648": {
+   "name": "glory_crucible_slice_12",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "795233044": {
+   "name": "meathook_impact_flesh_3",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "797274459": {
+   "name": "lock_on_fire_upgraded_2",
+   "snd": [
+    "sfx",
+    "sfx_patch_1"
+   ]
+  },
+  "801629114": {
+   "name": "metal_climb_hit_16",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "802990305": {
+   "name": "flame_belch_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "8080845": {
+   "name": "glory_crucible_slice_23",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "808737759": {
+   "name": "player_rocket_explosion_8",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "808842475": {
+   "name": "eol_shotgun_double_fire_5",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "824758311": {
+   "name": "wpn_sp_shotgun_fire_end_4",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "826487854": {
+   "name": "player_rocket_remote_explo_11",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "83526100": {
+   "name": "pop_rocket_ready_3",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "840464124": {
+   "name": "glory_gore_bone_snap_3",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "847987490": {
+   "name": "meathook_impact_flesh_2",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "849579048": {
+   "name": "metal_climb_hit_47",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "851251895": {
+   "name": "bfg_fire_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "852904202": {
+   "name": "wpn_sp_shotgun_fire_end_7",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "853000552": {
+   "name": "metal_climb_hit_61",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "855598878": {
+   "name": "heavy_cannon_dry_fire_9",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "863237502": {
+   "name": "pop_rocket_explosion_3",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "864522479": {
+   "name": "crucible_movements_short_0",
+   "snd": [
+    "sfx",
+    "sfx_patch_1"
+   ]
+  },
+  "869445650": {
+   "name": "wpn_sp_chaingun_fire_12",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "876750861": {
+   "name": "punch_flesh_4",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "879241169": {
+   "name": "crucible_ammo_pickup",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "881854783": {
+   "name": "metal_climb_hit_120",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "892553894": {
+   "name": "glory_huge_guts_explode_4",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "905990180": {
+   "name": "pop_rocket_ready_0",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "906089506": {
+   "name": "eol_shotgun_double_fire_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "907313152": {
+   "name": "wpn_sp_rocket_launcher_fire_6",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "908249221": {
+   "name": "heavy_cannon_dry_fire_1",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "909213342": {
+   "name": "in_flight_mobility_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "912757098": {
+   "name": "ammo_shells_rand_loud_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "916870093": {
+   "name": "glory_gore_bone_snap_10",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "920828823": {
+   "name": "pop_rocket_explosion_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "924529847": {
+   "name": "heavy_cannon_dry_fire_4",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "927703907": {
+   "name": "gauss_ballista_fire_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "929003188": {
+   "name": "glory_gore_bone_snap_17",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "932385817": {
+   "name": "player_dash2_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "940703814": {
+   "name": "wpn_sp_shotgun_pump_in_0",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "941722790": {
+   "name": "shotgun_pop_rocket_fire_3",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "944600874": {
+   "name": "player_rocket_remote_explo_shockwave_5",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "951828508": {
+   "name": "ballista_explode_small_3",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "959982973": {
+   "name": "crucible_open",
+   "snd": [
+    "sfx",
+    "sfx_patch_3"
+   ]
+  },
+  "96080195": {
+   "name": "pop_rocket_explosion_12",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "969220932": {
+   "name": "plasma_shot",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "973391810": {
+   "name": "in_flight_mobility_14",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "975973635": {
+   "name": "pop_rocket_explosion_5",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "98091126": {
+   "name": "player_rocket_remote_explo_6",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "983440738": {
+   "name": "glory_crucible_slice_7",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "986313484": {
+   "name": "glory_huge_guts_explode_0",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "986330926": {
+   "name": "heavy_cannon_bolt_fire_6",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "986443850": {
+   "name": "pop_rocket_explosion_10",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "992695084": {
+   "name": "bfg_fire_2",
+   "snd": [
+    "sfx"
+   ]
+  },
+  "995406637": {
+   "name": "heavy_cannon_dry_fire_2",
+   "snd": [
+    "sfx",
+    "sfx_patch_2"
+   ]
+  },
+  "998259829": {
+   "name": "ballista_explode_small_1",
+   "snd": [
+    "sfx"
+   ]
+  }
+ }
+}

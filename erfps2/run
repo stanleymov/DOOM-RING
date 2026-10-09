@@ -1,0 +1,20 @@
+#! /bin/bash
+
+ERFPS2_LOG_PATH="$HOME/.local/share/Steam/steamapps/common/ELDEN RING/Game/erfps2.log"
+
+DXC_PATH="/usr/bin/dxc/"
+
+cargo build || exit 1
+cd target/x86_64-pc-windows-msvc/debug || exit 1
+mkdir -p .hotpatch && cp -u erfps2.dll .hotpatch/erfps2.dll && cp -u ../../../dist/erfps2.toml .hotpatch/erfps2.toml
+
+trap "kill 0" SIGINT
+
+RUST_LOG=trace me3 launch -g er --disable-arxan --savefile DEV.sl2 --native .hotpatch/erfps2.dll "$@" &
+me3pid=$!
+
+tail -f "$ERFPS2_LOG_PATH" &
+tailpid=$!
+
+wait $me3pid
+kill $tailpid

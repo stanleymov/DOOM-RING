@@ -1,0 +1,15 @@
+profileVersion = "v1"
+savefile = "DOOMRING.sl2"
+disable_arxan = true
+
+[[supports]]
+game = "eldenring"
+
+[[packages]]
+path = 'mod/'
+
+[[natives]]
+path = 'natives/erfps2.dll'
+
+[[natives]]
+path = 'natives/doomslayer.dll'

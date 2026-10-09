@@ -1,0 +1,15 @@
+target/
+*.log
+release/
+portable/
+
+# converted DOOM content and game files: never commit
+dist/natives/*.dll
+dist/natives/doom_*/
+dist/natives/doomslayer_save.json
+dist/natives/doomslayer_state.json
+dist/natives/doomslayer_cmd.*
+*.resources
+*.snd
+*.wem
+*.md6*

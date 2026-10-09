@@ -1,0 +1,76 @@
+# Baked HUD tuning, built into the DLL (tools/hud_bake.py). The live doomslayer.toml overrides any of it.
+hud_style = 1           # HUD look (live): 1 = Doom's own HUD textures, 0 = the previous drawn HUD
+hud_left = [0.0, 0.0, 1.0]      # Doom HUD bottom-left block (live): move x, move y (1080p px, + = right / down), scale
+hud_right = [0.0, 0.0, 1.0]     # Doom HUD bottom-right block (live): move x, move y, scale
+hud_pips = [1.0, 24.0]          # pips: (size now in [hud]), spacing between pips (px)
+hud_pip_count = [4, 8]          # pips per row (live): shield, health
+
+[hud]
+armor_row = [-10.0, 0.0, 1.0, 1.0]
+armor_icon = [6.5, -8.7, 0.79, 1.0]
+armor_icon_glow = [0.0, 0.0, 1.0, 0.4]
+armor_number = [10.0, 0.0, 1.0, 1.0]
+armor_pips = [0.0, 0.0, 1.0, 1.0]
+armor_end = [7.5, 0.0, 1.0, 1.0]
+armor_pip_fill = [1.0, -1.5, 1.0, 1.0]
+armor_pip_glow = [0.0, 0.0, 1.0, 0.3]
+health_row = [0.0, 0.0, 1.0, 1.0]
+health_icon = [-3.0, -3.4, 0.7, 1.0]
+health_number = [0.0, 0.0, 1.0, 1.0]
+health_pips = [0.0, 0.0, 1.0, 1.0]
+health_pip_fill = [-0.5, -1.5, 1.0, 1.0]
+health_pip_glow = [0.0, 0.0, 1.0, 0.3]
+decor = [-22.0, 0.0, 1.0, 0.0]
+hex_plate = [0.0, 0.0, 1.0, 0.0]
+dash = [0.0, 0.0, 0.85, 1.0]
+dash_icon = [0.0, 0.0, 1.6, 1.0]
+dash_count = [-3.0, -3.0, 1.0, 1.0]
+dash_glow = [0.0, 0.0, 1.0, 1.6]
+dash_icon_glow = [0.7, 0.0, 1.0, 0.3]
+blood_punch = [6.0, 0.0, 0.85, 1.0]
+blood_punch_icon = [0.0, 0.0, 1.5, 1.0]
+blood_punch_count = [-3.0, -3.0, 1.0, 1.0]
+blood_punch_glow = [0.0, 0.0, 1.0, 1.6]
+blood_punch_icon_glow = [0.7, 0.0, 1.0, 0.3]
+ammo_row = [0.0, 0.0, 1.0, 1.0]
+ammo_number = [-15.0, 0.0, 1.0, 1.0]
+ammo_icon = [-15.0, 0.0, 1.0, 1.0]
+mod_icon = [-14.7, 0.0, 1.0, 1.0]
+chainsaw_box = [147.0, 5.0, 0.85, 1.0]
+flame_box = [39.0, 5.0, 0.85, 1.0]
+chainsaw_box_glow = [0.0, 0.0, 1.0, 0.5]
+flame_box_glow = [0.0, 0.0, 1.0, 0.5]
+chainsaw_box_key = [3.0, 8.0, 1.0, 1.0]
+flame_box_key = [3.0, 8.0, 1.0, 1.0]
+chainsaw_box_icon = [0.0, 0.0, 1.0, 0.7]
+flame_box_icon = [0.0, 0.0, 1.0, 0.7]
+chainsaw_color = [1.0, 0.5, 0.15, 1.0]
+flame_color = [1.0, 0.82, 0.2, 1.0]
+keys = [0.0, 0.0, 1.0, 1.0]
+key_letters = [0.0, 0.0, 1.0, 1.0]
+key_lshft = [0.85, 0.0, 1.0, 1.0]
+wheel_pulse = [0.25, 0.8, 1.0, 1.0]   # selected wedge pulse: min glow, max glow, speed
+settings = [0.0, 0.0, 0.92, 1.0]   # the whole window: x, y offset, scale, opacity
+set_footer = [17.0, 16.5, 14.0, 46.0]   # reset, restart warning, autosave text size, y from the bottom
+set_textx = [83.0, 40.0, 90.0, 24.0]   # text x: left labels, section titles, hint under SHOW HUD, key-binding labels
+set_text = [19.0, 19.0, 14.0, 15.5]   # text size: labels, values, key tags + hints, section titles
+set_width = [620.0, 720.0, 560.0, 160.0]   # left row width, key-binding column x (from the panel edge), its width, slider length
+set_cols = [307.0, 171.0, 343.0, 465.0]   # left control x, value x (from control), key slot 1 / 2 centre (from the key column)
+set_rows = [54.0, 43.0, 62.0, 48.0]   # left row step, key row step, section gap, row height
+set_arrows = [55.0, 175.0, 0.0, 0.0]   # chainsaw HP limit: arrow distance from the number, number centre from the control column
+set_title = [30.0, 22.0, 18.0, 90.0]   # title, subtitle, [F1] CLOSE size, CLOSE distance from the right edge
+set_header = [22.0, 0.0, 0.0, 0.0]   # the whole title bar: y offset (+ = down)
+set_autosave = [0.0, 0.35, -24.0, 0.0]   # "changes save automatically": y offset, green tint, x offset (- = left)
+set_body = [0.95, 0.0, 0.0, 0.0]   # settings body scale (rows, sections, key bindings), anchor dy; title bar + footer stay
+set_warn = [30.0, 0.0, 18.5, 0.0]   # restart warning in the title bar: dx after // SETTINGS, dy, text size
+set_reset = [15.0, 0.0, 0.0, 0.0]   # RESET TO DEFAULTS button: dx (+ = right)
+set_rec = [0.0, 0.0, 16.0, 0.0]   # recommended chainsaw / Crucible damage text: dx, dy, size, word gap (x size, 0 = 0.45)
+crucible_box = [-69.0, 5.0, 0.85, 1.0]   # the Crucible box: left of the Flame Belch box, same size / spacing
+crucible_box_glow = [0.0, 0.0, 1.0, 0.5]
+crucible_box_key = [3.0, 8.0, 1.0, 1.0]
+crucible_box_icon = [0.0, 0.0, 1.0, 1.0]   # [dx, dy, size scale, opacity]
+crucible_pips = [0.0, 7.5, 1.0, 1.0]   # reticle charge cells: dy (art px) - 7.5 = centred top/bottom in the frame
+blood_punch_key = [0.0, 0.0, 1.0, 1.0]   # Blood Punch key tag: dx, dy (3 px right was too much - user)
+dash_padkey = [1.0, 0.0, 1.0, 1.0]   # controller icon over the dash hexagon: dx, dy
+blood_punch_padkey = [1.0, 0.0, 1.0, 1.0]   # controller icon over the Blood Punch hexagon: dx, dy
+pad_icon = [0.0, 4.0, 1.0, 1.0]   # controller icons in the HUD: dx, dy (+ = down), size, opacity

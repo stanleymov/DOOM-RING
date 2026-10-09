@@ -1,0 +1,35 @@
+DOOM RING - credits
+===================
+
+DOOM RING is an unofficial fan mod, made with AI help (Claude by Anthropic). It is not affiliated
+with or endorsed by id Software, Bethesda, FromSoftware or Bandai Namco.
+DOOM Eternal (c) id Software / Bethesda. ELDEN RING (c) FromSoftware / Bandai Namco.
+No game files are included: the setup builds DOOM RING's DOOM content from your own DOOM Eternal.
+
+Mods and libraries inside DOOM RING
+-----------------------------------
+- me3 - the mod loader that starts ELDEN RING with the mod                 MIT / Apache-2.0
+- erfps2 by Dasaav - the first-person camera (DOOM RING uses its own fork)  MIT / Apache-2.0
+- fromsoftware-rs - ELDEN RING's game structures for Rust                  MIT / Apache-2.0
+- hudhook - draws the DOOM HUD, guns and menus over the game              MIT
+  - MinHook (inside hudhook) - function hooking                            BSD-2-Clause
+- rodio and the other Rust libraries (serde, toml, glam, windows-rs, pelite, png, fastrand, log,
+  simplelog)                                                                MIT / Apache-2.0
+- Chakra Petch font (Cadson Demak)                                          SIL Open Font License
+
+Research and references (no code from them is included)
+--------------------------------------------------------
+- The Grand Archives - ELDEN RING Cheat Table: game addresses and patterns (item popup, animations)
+- Erd-Tools: the function pattern the mod's own auto pickup is built on
+- Smithbox, WitchyBND and UXM Selective Unpack: reading ELDEN RING's data during development
+- Vega and EternalAudioExtractor: used while developing; the setup uses DOOM RING's own readers
+- SAMUEL by brongo and contributors: DOOM Eternal's archive formats
+
+Setup tools (used once while installing)
+----------------------------------------
+- SAMUEL (samuel-cli: SAMUEL's core with a small command line front end)    GPL-3.0
+- ww2ogg by Adam Gashlin (hcs64), incl. its packed codebooks                BSD-3-Clause
+- ffmpeg 9.0.2, gyan.dev build (bundled, portable - not installed)          GPL v3
+- Python 3.12, numpy, scipy, Pillow, Tcl/Tk                                 PSF, BSD, HPND, Tcl licences
+
+Licence texts are in this folder.
