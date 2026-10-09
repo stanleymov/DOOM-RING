@@ -22,7 +22,8 @@ you install or update DOOM RING. Windows 10/11 and about 3 GB of free space are 
 
 ## Gameplay
 
-You play ELDEN RING in first person as the Doom Slayer:
+You play ELDEN RING in first person as the Doom Slayer: DOOM Eternal's guns, arms, movement, HUD,
+sounds and combat music, fighting ELDEN RING's enemies and bosses.
 
 - **Doom movement.** Fast ground movement, a jump and a double jump with air control, and a dash
   (2 charges that refill one after the other). Your ELDEN RING character's own footsteps go quiet in
