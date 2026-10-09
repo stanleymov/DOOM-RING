@@ -1,5 +1,7 @@
 # DOOM RING
 
+[![Download the latest release](https://img.shields.io/github/v/release/stanleymov/DOOM-RING?label=Download&style=for-the-badge&color=c0261b)](../../releases/latest)
+
 DOOM Eternal's guns, HUD, sounds and combat music inside ELDEN RING: Doom movement (dash, double
 jump), glory kills, chainsaw, Blood Punch, Flame Belch, the Crucible, and 8 of DOOM Eternal's combat
 suites played by Doom's own music rules.
