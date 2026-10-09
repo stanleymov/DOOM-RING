@@ -6,6 +6,8 @@ DOOM Eternal's guns, HUD, sounds and combat music inside ELDEN RING: Doom moveme
 jump), glory kills, chainsaw, Blood Punch, Flame Belch, the Crucible, and 8 of DOOM Eternal's combat
 suites played by Doom's own music rules.
 
+![A glory kill on a Godrick soldier at Gatefront](docs/images/glory_kill.jpg)
+
 > **Unofficial fan mod.** Not affiliated with or endorsed by id Software, Bethesda, FromSoftware or
 > Bandai Namco. DOOM Eternal © id Software / Bethesda. ELDEN RING © FromSoftware / Bandai Namco.
 
@@ -36,6 +38,11 @@ sounds and combat music, fighting ELDEN RING's enemies and bosses.
 - **Doom pickups.** Enemies drop Doom ammo and health. Burning enemies shed armor. Walk over a pickup
   to collect it.
 
+<p>
+<img src="docs/images/rocket_launcher.jpg" width="49%" alt="Rocket Launcher at Gatefront">
+<img src="docs/images/explosion.jpg" width="49%" alt="An explosion at Gatefront Ruins">
+</p>
+
 ### Weapons and their right-click mods
 
 | Slot | Weapon | Right click |
@@ -48,6 +55,16 @@ sounds and combat music, fighting ELDEN RING's enemies and bosses.
 | 6 | Ballista | **Arbalest**: hold to draw and charge, release to fire a bolt that sticks and explodes |
 | 7 | Chaingun | **Mobile Turret**: hold to unfold three barrels for much faster fire while you walk slower |
 | 8 | BFG 9000 | (none) |
+
+<p>
+<img src="docs/images/bfg.jpg" width="49%" alt="BFG 9000 firing">
+<img src="docs/images/chaingun_turret.jpg" width="49%" alt="Chaingun Mobile Turret">
+<img src="docs/images/precision_bolt.jpg" width="49%" alt="Heavy Cannon Precision Bolt scope">
+<img src="docs/images/ballista.jpg" width="49%" alt="Ballista hitting a knight">
+<img src="docs/images/plasma_rifle.jpg" width="49%" alt="Plasma Rifle">
+<img src="docs/images/crucible.jpg" width="49%" alt="The Crucible drawn">
+</p>
+<p align="center"><sub>BFG 9000 · Chaingun Mobile Turret · Heavy Cannon Precision Bolt · Ballista · Plasma Rifle · the Crucible</sub></p>
 
 ### The Doom Slayer's tools
 
@@ -65,6 +82,12 @@ sounds and combat music, fighting ELDEN RING's enemies and bosses.
   charges depending on how tough the enemy is (**CRUCIBLE HIT DAMAGE** in the settings). It holds up
   to 3 charges.
 - **Punches.** A plain melee punch when nothing is staggered.
+
+<p>
+<img src="docs/images/glory_knight.jpg" width="49%" alt="Glory kill on a knight">
+<img src="docs/images/blood_punch.jpg" width="49%" alt="Blood Punch">
+</p>
+<p align="center"><sub>A glory kill · a Blood Punch</sub></p>
 
 ### Rules changed to fit ELDEN RING
 
@@ -128,6 +151,8 @@ action plus a controller button.
 
 ## The settings window (F1)
 
+![The DOOM RING settings window](docs/images/settings.jpg)
+
 Changes save automatically.
 
 | Setting | What it does |
@@ -139,7 +164,6 @@ Changes save automatically.
 | **AUDIO**: Sound effects, Doom music, Music on / off | volumes and music |
 | **GLORY KILL STAGGER ON / OFF** | Off: enemies don't stop at the stagger, they just die |
 | **SHOW HUD** | The Doom HUD on or off (the crosshair, scope and interact prompt stay) |
-| **DOOM MODE ON / OFF** | The whole Doom layer on or off (plain ELDEN RING) |
 | **KEY BINDINGS** | Primary, secondary and controller key for every action |
 | **RESET TO DEFAULTS** | Back to the standard values |
 
