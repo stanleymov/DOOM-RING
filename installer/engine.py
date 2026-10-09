@@ -179,7 +179,8 @@ class Installer:
     from that thread (the GUI marshals them)."""
 
     def __init__(self, doom, target, on_progress, on_log, workers=None):
-        self.doom = Path(doom)
+        # (None: DOOM Eternal isn't installed - fine for a mod-files update, see steps())
+        self.doom = Path(doom) if doom else None
         self.target = Path(target)
         self.version = setup_version()
         # an update over the same converted content only copies the new mod files (seconds); a new
@@ -214,7 +215,7 @@ class Installer:
     def env(self):
         e = dict(os.environ)
         e.update({
-            "DOOMRING_DOOM": str(self.doom),
+            "DOOMRING_DOOM": str(self.doom or ""),
             "DOOMRING_WORK": str(self.work),
             "DOOMRING_OUT": str(self.natives),
             "DOOMRING_VM_OUT": str(self.natives / "doom_vm"),
@@ -389,9 +390,11 @@ class Installer:
         self.target.mkdir(parents=True, exist_ok=True)
         self.log_file = open(log_path, "w", encoding="utf-8")
         self.log(f"DOOM RING {self.version['version']} setup {time.strftime('%Y-%m-%d %H:%M')}: "
-                 f"DOOM Eternal {self.doom} -> {self.target}")
+                 f"DOOM Eternal {self.doom or '(not installed: update only)'} -> {self.target}")
         if self.update_from:
             self.log(f"update from {self.update_from}" + (" (mod files only)" if self.quick else " (DOOM content rebuilt)"))
+        if self.doom is None and not self.quick:
+            raise RuntimeError("DOOM Eternal is needed to build DOOM RING's DOOM files - install it through Steam")
         steps = self.steps()
         total = sum(w for w, _, _ in steps)
         done = 0

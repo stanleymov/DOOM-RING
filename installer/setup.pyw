@@ -183,13 +183,21 @@ class Wizard(tk.Tk):
             ttk.Button(head, text="Browse...", command=lambda w=which: self.browse_game(w)).pack(side="right")
             ttk.Label(box, text=msg, style="Panel.TLabel", wraplength=640, justify="left",
                       foreground=FG if ok else WARN).pack(anchor="w", pady=(6, 0))
+        self.doom_ok = de_ok
+        # An update that only replaces the mod files doesn't read DOOM Eternal at all: no need to
+        # have it installed for that (user, 1.2 - the other PC had uninstalled it).
+        old, quick = self.existing()
+        update_only = bool(old) and quick and not de_ok
+        if update_only:
+            self.text(self.body, f"DOOM Eternal isn't needed for this update: DOOM RING Version {old} is installed and "
+                      "only its mod files change.", pady=(0, 6)).configure(foreground=GREEN)
         row = ttk.Frame(self.body)
         row.pack(fill="x", pady=(4, 0))
         ttk.Button(row, text="Check again", command=self.recheck).pack(side="left")
-        if not (er_ok and de_ok):
+        if not (er_ok and (de_ok or update_only)):
             self.text(row, "  Install the missing game(s) through Steam first, then press Check again.",
                       style="Dim.TLabel", side="left")
-        self.next_btn.state(["!disabled"] if er_ok and de_ok else ["disabled"])
+        self.next_btn.state(["!disabled"] if er_ok and (de_ok or update_only) else ["disabled"])
 
     def recheck(self):
         old = str(self.default_target())
@@ -287,6 +295,12 @@ class Wizard(tk.Tk):
         except OSError as e:
             messagebox.showerror("DOOM RING Setup", f"Windows won't let the setup write to\n{t}\n\n({e.strerror})\n\n"
                                  "Choose another folder, or start the setup with right-click > Run as administrator.")
+            return False
+        # without DOOM Eternal only a mod-files update is possible
+        if not getattr(self, "doom_ok", True) and not self.existing()[1]:
+            messagebox.showerror("DOOM RING Setup", "DOOM Eternal is needed to install DOOM RING in this folder: the setup "
+                                 "builds the DOOM files from it. Install DOOM Eternal through Steam, or pick the folder "
+                                 "of your existing DOOM RING to update it.")
             return False
         # (inside the ELDEN RING folder is fine - the default; just not in its Game folder or in DOOM Eternal)
         bad = [Path(p) for p in ([self.doom_path] if self.doom_path else [])]
