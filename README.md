@@ -241,7 +241,6 @@ be allowed to capture overlays, or your video shows plain ELDEN RING without the
   **"Capture third-party overlays (such as Steam)"**.
 - **Other recording software:** look for a similar overlay setting, or use window or display capture
   instead.
-- Check a short test recording before you go live.
 
 ## Credits
 
