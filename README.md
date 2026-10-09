@@ -106,23 +106,23 @@ You play ELDEN RING in first person as the Doom Slayer:
 Every key can be changed in the settings window (**F1**), with a primary and a secondary key for each
 action plus a controller button.
 
-| Action | Keyboard / mouse | Xbox controller |
+| Action | Keyboard / mouse | Controller (Xbox / PlayStation) |
 |---|---|---|
-| Fire | Left mouse | RT |
-| Weapon mod (right-click ability) | Right mouse | LT |
-| Jump / double jump | Space | A |
-| Dash | Left Shift | B |
-| Melee (punch, glory kill, Blood Punch) | F or mouse back button | RS click |
-| Chainsaw | C | LB |
-| Flame Belch | G or mouse forward button | Y |
+| Fire | Left mouse | RT / R2 |
+| Weapon mod (right-click ability) | Right mouse | LT / L2 |
+| Jump / double jump | Space | A / Cross |
+| Dash | Left Shift | B / Circle |
+| Melee (punch, glory kill, Blood Punch) | F / Mouse back button | RS click / R3 |
+| Chainsaw | C | LB / L1 |
+| Flame Belch | G / Mouse forward button | Y / Triangle |
 | Crucible (draw / put away) | V | D-pad up |
-| Weapon wheel (hold) / last weapon (tap) | Q or middle mouse | RB (hold, right stick picks) |
+| Weapon wheel (hold) / last weapon (tap) | Q / Middle mouse | RB / R1 (hold, right stick picks) |
 | Weapons 1-8 | 1-8 | weapon wheel |
-| Interact (ELDEN RING's) | E | X |
+| Interact (ELDEN RING's) | E | X / Square |
 | Mark enemy | Z | D-pad down |
 | Unstick | F8 | D-pad left |
 | Doom mode on / off | F9 | D-pad right |
-| Settings window | F1 | View |
+| Settings window | F1 | View / Create |
 
 **Controller notes**
 - Xbox pads work directly. PlayStation pads work through Steam Input, and PlayStation icons show
