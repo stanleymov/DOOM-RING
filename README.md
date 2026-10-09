@@ -22,21 +22,16 @@ you install or update DOOM RING. Windows 10/11 and about 3 GB of free space are 
 
 ## Gameplay
 
-You play ELDEN RING in first person as the Doom Slayer: DOOM Eternal's guns, arms, movement, HUD,
-sounds and combat music, fighting ELDEN RING's enemies and bosses.
+You play ELDEN RING in first person as the Doom Slayer:
 
-- **Doom movement.** Fast ground movement, a jump and a double jump with air control, and a dash
-  (2 charges that refill one after the other). Your ELDEN RING character's own footsteps go quiet in
-  the air.
-- **8 Doom weapons** with their first-person arms and animations, recoil, sway and Doom's own weapon
-  bob. Switch with the number keys or the **weapon wheel**, which slows the game while it's open.
-- **Doom HUD.** Health, armor, ammo, dash and equipment pips, the chainsaw / Flame Belch / Crucible
-  boxes, enemy health bars and the boss bars. ELDEN RING's own HUD is hidden.
+- **Doom movement.** Fast ground movement, double jump with air control, and a dash.
+- **8 Doom weapons** with their first-person arms and animations and recoil. Switch with the number
+  keys or the **weapon wheel**, which slows the game while it's open.
+- **Doom HUD.** Health, armor, ammo, dash and equipment. ELDEN RING's own HUD is hidden.
 - **DOOM Eternal's combat music.** 8 of DOOM Eternal's level suites, played by Doom's own music rules.
-  The music starts when a fight starts and fades out 8 seconds after it ends. The next fight
-  continues where it stopped.
-- **Doom pickups.** Enemies drop Doom ammo and health. Burning enemies shed armor. Walk over a pickup
-  to collect it.
+  The music starts when a fight starts and fades out after it ends.
+- **Doom pickups.** Enemies drop Doom ammo and health. Burning enemies drop shield. Walk over a pickup
+  to collect it automatically.
 
 ![The Heavy Cannon at Gatefront Ruins](docs/images/heavy_cannon.jpg)
 
