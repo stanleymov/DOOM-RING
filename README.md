@@ -180,13 +180,15 @@ The setup keeps both files when you update. Some of what you can change in `doom
 
 Every line in the file has a short comment that says what it does.
 
-## Made by people and Claude, not by generative AI art
+## Made and tested by people and Claude, not by generative AI slop
 
 - **No generative AI was used for any visual or audio asset.** Every gun, arm, animation, texture,
   HUD element, sound and piece of music in DOOM RING is DOOM Eternal's own, converted from your own
   install by the setup.
 - **The code was written with [Claude Code](https://claude.com/claude-code)** (Anthropic), under the
-  author's direction. It went through intensive human bug testing and beta testing.
+  author's direction. It went through intensive human bug testing and beta testing. So it's not just an
+  "ask AI to put DOOM in ELDEN RING" mod: it's a mod that has taken several days to refine, to make it
+  play and feel like DOOM.
 
 ## No game files here: bring your own
 
