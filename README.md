@@ -232,6 +232,17 @@ normal save. **Never take a modded game online.**
 
 Building from source: see [BUILDING.md](BUILDING.md).
 
+## Recording and streaming
+
+DOOM RING draws its guns, arms and HUD as an overlay on top of ELDEN RING. Recording software has to
+be allowed to capture overlays, or your video shows plain ELDEN RING without the Doom layer.
+
+- **OBS Studio:** in your **Game Capture** source's properties, tick
+  **"Capture third-party overlays (such as Steam)"**.
+- **Other recording software:** look for a similar overlay setting, or use window or display capture
+  instead.
+- Check a short test recording before you go live.
+
 ## Credits
 
 See [CREDITS.txt](installer/licenses/CREDITS.txt). In short:
