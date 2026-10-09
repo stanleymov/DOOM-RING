@@ -248,7 +248,8 @@ See [CREDITS.txt](installer/licenses/CREDITS.txt). In short:
 - the Chakra Petch font (SIL OFL).
 
 **Made with AI.** DOOM RING's code was written with Claude (Anthropic) under the author's direction
-and testing.
+and testing. No AI-generated assets were used in the production of this mod. All sounds, music,
+textures and icons are from DOOM Eternal.
 
 ## Licence
 
