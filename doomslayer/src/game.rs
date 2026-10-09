@@ -55,6 +55,12 @@ pub fn in_event_anim(chr: &ChrIns) -> Option<i32> {
     if a <= 0 {
         return None;
     }
+    // 60071 isn't a door / lever: it flickers on and off for a frame or two around items, glory
+    // kills and enemy contact (192 times in a 1.1 session) and each flicker cut a jump and stopped
+    // the run (user, 1.2: move freely through it).
+    if a % 1_000_000 == 60071 {
+        return None;
+    }
     if (60000..70000).contains(&(a % 1_000_000)) {
         return Some(a);
     }
@@ -197,7 +203,33 @@ pub fn all_characters(w: &WorldChrMan) -> Vec<(*mut ChrIns, &'static str)> {
     out
 }
 
+/// Off while the game loads / fades (the slayer sets it each frame): the world is half built then
+/// and nothing needs a character scan (1.2 crash fix).
+pub static SCAN_OK: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(true);
+
+/// A character that's fully there: its module container and its data / physics modules exist.
+/// One being built or torn down has null module pointers - the 1.1 crash read `modules.data` of
+/// one (address 0) while enemies spawned around the player.
+pub fn chr_ok(chr: *const ChrIns) -> bool {
+    if chr.is_null() {
+        return false;
+    }
+    unsafe {
+        let m = *(std::ptr::addr_of!((*chr).modules) as *const usize);
+        if m == 0 {
+            return false;
+        }
+        let m = m as *const eldenring::cs::ChrInsModuleContainer;
+        let data = *(std::ptr::addr_of!((*m).data) as *const usize);
+        let physics = *(std::ptr::addr_of!((*m).physics) as *const usize);
+        data != 0 && physics != 0
+    }
+}
+
 fn enemies_inner(max_dist: f32) -> Vec<Enemy> {
+    if !SCAN_OK.load(std::sync::atomic::Ordering::Relaxed) {
+        return vec![];
+    }
     let Some(w) = world() else { return vec![] };
     let Some(me) = w.main_player.as_ref() else { return vec![] };
     let player_ptr = &me.chr_ins as *const ChrIns;
@@ -207,7 +239,7 @@ fn enemies_inner(max_dist: f32) -> Vec<Enemy> {
     // characters and misses NPC invaders / red phantoms entirely (only ~6 sets, ~1700 slots).
     let mut seen = std::collections::HashSet::new();
     for (ptr, _) in all_characters(w) {
-        if ptr as *const ChrIns == player_ptr || !seen.insert(ptr as usize) {
+        if ptr as *const ChrIns == player_ptr || !seen.insert(ptr as usize) || !chr_ok(ptr) {
             continue;
         }
         let chr = unsafe { &mut *ptr };

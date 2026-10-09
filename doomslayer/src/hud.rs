@@ -442,16 +442,16 @@ impl Snapshot {
         if !s.ready || s.menu_t > 0.5 {
             return None;
         }
-        let p = game::player()?;
-        let d = &p.chr_ins.modules.data;
-        if d.max_hp <= 0 {
+        // (the slayer's copy of the game's HP: no game reads on the render thread)
+        let (pool, pool_max) = s.hud_pool;
+        if pool_max <= 0 {
             return None;
         }
         Some(Self {
             time: s.time,
             // The game's HP pool carries the shield on top: show health and shield separately.
-            hp: if s.base_max > 0 { s.health.min(d.hp).clamp(0, s.base_max) } else { d.hp },
-            max_hp: if s.base_max > 0 { s.base_max } else { d.max_hp },
+            hp: if s.base_max > 0 { s.health.min(pool).clamp(0, s.base_max) } else { pool },
+            max_hp: if s.base_max > 0 { s.base_max } else { pool_max },
             armor: s.armor,
             armor_max: s.cfg.armor_max,
             weapon: s.weapon,
@@ -467,7 +467,7 @@ impl Snapshot {
             wheel_t: s.wheel_t,
             pickups: crate::pickups::visuals(&s.pickups),
             bars: s.bars.clone(),
-            bosses: game::boss_bars(),
+            bosses: s.boss_bars.clone(),
             // (controller mode: the pad buttons, drawn as Doom's button icons)
             keys: {
                 let k = &s.cfg.keys;

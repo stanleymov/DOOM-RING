@@ -405,18 +405,19 @@ pub fn try_apply(cfg: &Config) -> bool {
     }
 
     // "Doomslayer" starting class (replaces the Vagabond): keeps the armour, starts with no weapon
-    // or shield equipped (the longsword was back for a test only - user), Vigor 30 (~1000 HP).
+    // or shield equipped (the longsword was back for a test only - user), the Vagabond's own Vigor
+    // 15 (user, 1.2; was 30 = ~1000 HP, too tanky). Only new characters start with it.
     // The level stays the Vagabond's own (it was raised to 24 to match the stat total, which
     // started the class 15 levels ahead - user).
     if let Some(c) = repo.get_mut::<CharaInitParam>(3000) {
-        c.set_base_vit(30);
+        c.set_base_vit(15);
         c.set_equip_wep_right(110000);
         c.set_equip_wep_left(110000);
         c.set_equip_subwep_right(-1);
         c.set_equip_subwep_left(-1);
         c.set_equip_subwep_right3(-1);
         c.set_equip_subwep_left3(-1);
-        log::info!("class 3000 -> Doomslayer: vigor 30, level {}", c.soul_lv());
+        log::info!("class 3000 -> Doomslayer: vigor {}, level {}", c.base_vit(), c.soul_lv());
     }
     let renamed: Vec<_> = crate::game::find_msg("Vagabond")
         .into_iter()

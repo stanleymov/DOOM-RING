@@ -333,6 +333,11 @@ pub struct Slayer {
     /// Bosses (boss bar) seen alive, by handle -> HP; a defeated one earns a Crucible charge, given
     /// with the next drop picked up (user) - or after 30 s if nothing is picked up.
     boss_seen: HashMap<eldenring::cs::FieldInsHandle, i32>,
+    /// Boss bars for the HUD (name, hp, max): read here on the game's thread - the HUD used to scan
+    /// every character from the render thread each frame, racing the game (the 1.1 crash).
+    pub boss_bars: Vec<(String, i32, i32)>,
+    /// The game's HP pool and max this frame, for the HUD (no game reads on the render thread).
+    pub hud_pool: (i32, i32),
     boss_crucible: u32,
     boss_crucible_at: f32,
     // a boss bar that shows up within BOSS_STAGE s (in control) of a boss dying is that fight's next
@@ -722,6 +727,8 @@ impl Slayer {
             crucible_out: false,
             crucible_charges: 0,
             boss_seen: HashMap::new(),
+            boss_bars: Vec::new(),
+            hud_pool: (0, 0),
             boss_crucible: 0,
             boss_crucible_at: 0.0,
             boss_stage_window: 0.0,
@@ -1737,6 +1744,8 @@ impl Slayer {
         let dt = (now - self.last).as_secs_f32().min(0.1);
         self.last = now;
         self.time += dt;
+        // No character scans while the game loads or fades (half-built world; 1.2 crash fix).
+        game::SCAN_OK.store(!game::now_loading() && !game::screen_faded(), std::sync::atomic::Ordering::Relaxed);
 
         self.cfg_check -= dt;
         if self.cfg_check <= 0.0 {
@@ -1952,6 +1961,10 @@ impl Slayer {
             self.messages.pop_front();
         }
 
+        // ---- fall damage refund OFF (user, 1.2): it gave back 99% of ANY hp lost in the 0.6 s
+        // after touching ground, so enemy hits right after a jump / meathook / dash landing were
+        // cancelled. Full fall damage now (ER's own, see disable_fall_damage below).
+        /*
         // ---- fall damage cut by 99% (user): remember HP while airborne and give back 99% of
         // what the landing took. No no-death flag any more: it kept the player alive falling
         // through the void (low-res collision far below always counted as "ground below"), so
@@ -1990,6 +2003,7 @@ impl Slayer {
                 }
             }
         }
+        */
 
         // ---- armor lives inside the game's own HP. An SpEffect (params::SHIELD_SPEFFECT) raises
         // the game's max HP by exactly the shield, so its damage math is exact: a hit takes the
@@ -2049,6 +2063,7 @@ impl Slayer {
             data.hp = (self.health + self.armor).min(data.max_hp);
         }
         self.pool_prev = data.hp;
+        self.hud_pool = (data.hp, data.max_hp);
         // Shield effect: rate for the current shield, (re)applied every few seconds (respawns,
         // loading screens drop it).
         let want = if fixed {
@@ -2486,9 +2501,9 @@ impl Slayer {
             self.grabbed = grabbed;
         }
         self.on_ladder |= grabbed;
-        // Doom has no fall damage; and no heavy-landing stagger either (it bobbed the view).
+        // Full fall damage (user, 1.2: ER's own again); no heavy-landing stagger (it bobbed the view).
         if self.cfg.doom_move {
-            player.chr_ins.modules.material.disable_fall_damage = true;
+            player.chr_ins.modules.material.disable_fall_damage = false;
             player.chr_ins.modules.fall.disable_fall_motion = true;
             player.chr_ins.modules.fall.fall_timer = 0.0;
         }
@@ -2675,6 +2690,7 @@ impl Slayer {
         }
         self.track_deaths(&enemies);
         self.track_bosses(dt);
+        self.boss_bars = game::boss_bars();
         self.collect_tokens();
 
         // ---- melee / glory kill
@@ -3811,7 +3827,7 @@ impl Slayer {
         let Some(w) = game::world() else { return };
         let mut now = HashMap::new();
         for h in game::active_boss_handles() {
-            if let Some(c) = w.chr_ins_by_handle(&h) {
+            if let Some(c) = w.chr_ins_by_handle(&h).filter(|c| game::chr_ok(*c as *const _)) {
                 now.insert(h, c.modules.data.hp);
             }
         }
@@ -3827,7 +3843,7 @@ impl Slayer {
             // (the bar can vanish the frame the boss dies: look the character up directly)
             let dead = match now.get(h) {
                 Some(&n) => n <= 0,
-                None => w.chr_ins_by_handle(h).is_some_and(|c| c.modules.data.hp <= 0),
+                None => w.chr_ins_by_handle(h).is_some_and(|c| game::chr_ok(c as *const _) && c.modules.data.hp <= 0),
             };
             if *hp > 0 && dead {
                 if self.boss_stages.contains(h) {

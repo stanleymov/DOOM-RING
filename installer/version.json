@@ -1,5 +1,5 @@
 {
-  "version": "1.1",
+  "version": "1.2",
   "content": 1,
   "_content": "bump 'content' only when the converted DOOM files change (converters, sound / clip lists): an update then rebuilds them"
 }
