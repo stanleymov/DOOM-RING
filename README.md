@@ -56,12 +56,11 @@ You play ELDEN RING in first person as the Doom Slayer:
 
 - **Glory kills.** Hurt an enemy enough and it staggers. Melee it to glory kill it with a
   finisher. A glory kill restores health and charges the Blood Punch.
-- **Chainsaw.** Cuts an enemy in half and showers you with ammo for every gun. It runs on fuel pips;
-  the first pip refills by itself. When every gun is empty, the chainsaw comes up
-  on its own and left click uses it. Very tough enemies can't be chainsawed: the limit is the
-  **ENEMY CHAINSAW HP LIMIT** in the settings window.
-- **Flame Belch.** Sets the enemies in front of you on fire. Damaging a burning enemy makes it shed
-  armor. It recharges after use.
+- **Chainsaw.** Insta kills normal enemies and showers you with ammo for every gun. Chainsaw refuels
+  over time. Very tough enemies can't be chainsawed: the limit is the **ENEMY CHAINSAW HP LIMIT** in
+  the settings window.
+- **Flame Belch.** Sets the enemies in front of you on fire. Damaging a burning enemy makes it drop
+  shield. It recharges after use.
 - **Blood Punch.** Each glory kill gives a charge (up to 2). Your next melee becomes a shockwave
   punch that hits everything in front of you and kills outright.
 - **The Crucible.** Doom's blade (draw it with **V**). It kills an enemy in one swing and uses 1 to 3
