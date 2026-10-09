@@ -38,10 +38,10 @@ sounds and combat music, fighting ELDEN RING's enemies and bosses.
 - **Doom pickups.** Enemies drop Doom ammo and health. Burning enemies shed armor. Walk over a pickup
   to collect it.
 
-<p>
-<img src="docs/images/rocket_launcher.jpg" width="49%" alt="Rocket Launcher at Gatefront">
-<img src="docs/images/explosion.jpg" width="49%" alt="An explosion at Gatefront Ruins">
-</p>
+![The Heavy Cannon at Gatefront Ruins](docs/images/heavy_cannon.jpg)
+
+![A Blood Punch at Gatefront Ruins](docs/images/blood_punch.jpg)
+
 
 ### Weapons and their right-click mods
 
@@ -56,15 +56,6 @@ sounds and combat music, fighting ELDEN RING's enemies and bosses.
 | 7 | Chaingun | **Mobile Turret**: hold to unfold three barrels for much faster fire while you walk slower |
 | 8 | BFG 9000 | (none) |
 
-<p>
-<img src="docs/images/bfg.jpg" width="49%" alt="BFG 9000 firing">
-<img src="docs/images/chaingun_turret.jpg" width="49%" alt="Chaingun Mobile Turret">
-<img src="docs/images/precision_bolt.jpg" width="49%" alt="Heavy Cannon Precision Bolt scope">
-<img src="docs/images/ballista.jpg" width="49%" alt="Ballista hitting a knight">
-<img src="docs/images/plasma_rifle.jpg" width="49%" alt="Plasma Rifle">
-<img src="docs/images/crucible.jpg" width="49%" alt="The Crucible drawn">
-</p>
-<p align="center"><sub>BFG 9000 · Chaingun Mobile Turret · Heavy Cannon Precision Bolt · Ballista · Plasma Rifle · the Crucible</sub></p>
 
 ### The Doom Slayer's tools
 
@@ -83,11 +74,10 @@ sounds and combat music, fighting ELDEN RING's enemies and bosses.
   to 3 charges.
 - **Punches.** A plain melee punch when nothing is staggered.
 
-<p>
-<img src="docs/images/glory_knight.jpg" width="49%" alt="Glory kill on a knight">
-<img src="docs/images/blood_punch.jpg" width="49%" alt="Blood Punch">
-</p>
-<p align="center"><sub>A glory kill · a Blood Punch</sub></p>
+![The Crucible against a Godrick soldier](docs/images/crucible.jpg)
+
+![The BFG 9000 firing](docs/images/bfg.jpg)
+
 
 ### Rules changed to fit ELDEN RING
 
