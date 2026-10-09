@@ -6,7 +6,7 @@ DOOM Eternal's guns, HUD, sounds and combat music inside ELDEN RING: Doom moveme
 jump), glory kills, chainsaw, Blood Punch, Flame Belch, the Crucible, and 8 of DOOM Eternal's combat
 suites played by Doom's own music rules.
 
-![A glory kill on a Godrick soldier at Gatefront](docs/images/glory_kill.jpg)
+![The Super Shotgun against Margit, the Fell Omen](docs/images/margit.jpg)
 
 > **Unofficial fan mod.** Not affiliated with or endorsed by id Software, Bethesda, FromSoftware or
 > Bandai Namco. DOOM Eternal © id Software / Bethesda. ELDEN RING © FromSoftware / Bandai Namco.
