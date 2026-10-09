@@ -21,7 +21,7 @@ You need:
 
 ## Install
 
-1. Download `DOOM RING Setup x.x.zip` from [Releases](../../releases) and unzip it.
+1. Download the newest DOOM RING Setup zip from [Releases](../../releases) and unzip it.
 2. Run `Setup DOOM RING.exe`. It finds both games through Steam and builds the mod (5-20 minutes).
    Command windows may flash while it runs; that's normal.
 3. Start the game with **Play DOOM RING** (desktop shortcut or the .bat in the install folder).
