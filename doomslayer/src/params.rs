@@ -88,6 +88,10 @@ const FX_BELCH_ATK: u32 = 47100;
 const FX_GORE_ATK: u32 = 79981;
 
 pub const PEBBLE_BULLET: u32 = 10174000;
+/// A real Elden Ring hit for boss phase ends (damage.rs): the pebble dart with the Fire Pot's goods
+/// id (300) - with a goods id the game computes real damage (~14 on Malenia), without it 0.
+pub const FINISHER_BULLET: i32 = PEBBLE_BULLET as i32;
+pub const FINISHER_GOODS: i32 = 300;
 /// Doom loot tokens (real ER goods so the drop looks like any Elden Ring item):
 /// Sliver of Meat = ammo, Rowa Raisin = health. Converted and removed on pickup.
 pub const DOOM_AMMO_GOODS: i32 = 15000;

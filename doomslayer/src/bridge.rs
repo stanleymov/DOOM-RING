@@ -16,10 +16,43 @@ use crate::{
 
 static mut ACC: f32 = 0.0;
 
+/// chrwatch NPC: log that character's HP / no-death states / SpEffects / anim every frame they change.
+static WATCH_NPC: std::sync::atomic::AtomicI32 = std::sync::atomic::AtomicI32::new(0);
+
+fn watch_chr() {
+    use std::sync::Mutex;
+    static LAST: Mutex<String> = Mutex::new(String::new());
+    let npc = WATCH_NPC.load(std::sync::atomic::Ordering::Relaxed);
+    if npc == 0 {
+        return;
+    }
+    let mut line = String::new();
+    for c in game::chrs_by_npc(npc) {
+        let (ids, sp_nd) = game::sp_effects(c);
+        let _ = write!(
+            line,
+            "[ent {} hp {} anim {} dnd {} snd {} dead {} sp {:?}] ",
+            c.event_entity_id,
+            c.modules.data.hp,
+            crate::slayer::current_anim(c),
+            game::no_dead(c),
+            sp_nd,
+            c.chr_flags1c5.death_flag(),
+            ids
+        );
+    }
+    let mut last = LAST.lock().unwrap_or_else(|e| e.into_inner());
+    if *last != line {
+        log::info!("chrwatch {npc}: {line}");
+        *last = line;
+    }
+}
+
 pub fn tick(s: &mut Slayer, dt: f32) {
     if !s.cfg.bridge {
         return;
     }
+    watch_chr();
     unsafe {
         ACC += dt;
         if ACC < 0.25 {
@@ -243,6 +276,19 @@ fn run(s: &mut Slayer, line: &str) -> String {
             let _ = std::fs::write(crate::config::mod_dir().join("doomslayer_lots.txt"), out.join("
 "));
             format!("{} rows written to doomslayer_lots.txt", out.len())
+        }
+        // geomfind TEXT [R]: nearest assets whose name contains TEXT, with their offset from the player.
+        "geomfind" => {
+            let Some(want) = args.first() else { return "geomfind TEXT [R]".into() };
+            let list = game::assets_near(num(1).unwrap_or(300.0) as f32, false);
+            let rows: Vec<String> = list
+                .iter()
+                .filter(|(n, _, _)| n.contains(want))
+                .take(12)
+                .map(|(n, _, d)| format!("{n} d {:.1} off [{:.1}, {:.1}, {:.1}]", d.length(), d.x, d.y, d.z))
+                .collect();
+            rows.join("
+")
         }
         "geomnear" => {
             // Every map asset near the player, breakable or not (finding explosive barrels etc).
@@ -908,6 +954,37 @@ fn run(s: &mut Slayer, line: &str) -> String {
                 None => "no hostile".into(),
             }
         }
+        // graces <text>: graces whose place name contains <text> (row, discovered flag, lit?, name).
+        // light <row>: mark that grace discovered, so it shows up for fast travel (test characters).
+        "graces" | "light" => {
+            use eldenring::cs::{BonfireWarpParam, CSEventFlagMan, MsgRepository, SoloParamRepository};
+            use fromsoftware_shared::FromStatic;
+            let Ok(repo) = (unsafe { SoloParamRepository::instance() }) else { return "no params".into() };
+            let Ok(flags) = (unsafe { CSEventFlagMan::instance_mut() }) else { return "no event flags".into() };
+            let msg = unsafe { MsgRepository::instance().ok() };
+            let name = |id: i32| {
+                msg.and_then(|m| m.get_msg(19, id as u32))
+                    .map(|w| String::from_utf16_lossy(w).trim_end_matches('\0').to_string())
+                    .unwrap_or_default()
+            };
+            if cmd == "light" {
+                let Some(row_id) = num(0).map(|v| v as u32) else { return "light <row>".into() };
+                let Some(row) = repo.get::<BonfireWarpParam>(row_id) else { return "no such grace row".into() };
+                let flag = row.eventflag_id();
+                flags.virtual_memory_flag.set_flag(flag, true);
+                return format!("grace {row_id} '{}': flag {flag} now {}", name(row.text_id1()), flags.virtual_memory_flag.get_flag(flag));
+            }
+            let want = args.join(" ").to_lowercase();
+            let mut out = Vec::new();
+            for (id, row) in repo.rows::<BonfireWarpParam>() {
+                let n = name(row.text_id1());
+                if !n.is_empty() && n.to_lowercase().contains(&want) {
+                    let f = row.eventflag_id();
+                    out.push(format!("{id}: flag {f} lit {} '{n}'", flags.virtual_memory_flag.get_flag(f)));
+                }
+            }
+            if out.is_empty() { "no grace matches".into() } else { out.join("\n") }
+        }
         // npcname <npc>: the NpcName FMG text for that enemy (boss bar name check).
         "npcname" => {
             let want = num(0).map(|v| v as u32).unwrap_or(43114010);
@@ -1071,7 +1148,7 @@ fn run(s: &mut Slayer, line: &str) -> String {
             let mut out: Vec<String> = game::enemies(range)
                 .iter()
                 .filter(|e| e.hp() > 0)
-                .map(|e| format!("npc {} entity {} dist {:.0} hp {} area_boss {} bar {}", e.chr.npc_param_id, e.chr.event_entity_id, e.dist, e.max_hp(), crate::params::is_area_boss(e.chr.event_entity_id), bars.contains(&e.chr.field_ins_handle)))
+                .map(|e| format!("npc {} entity {} dist {:.0} hp {} area_boss {} bar {} no_dead {}", e.chr.npc_param_id, e.chr.event_entity_id, e.dist, e.max_hp(), crate::params::is_area_boss(e.chr.event_entity_id), bars.contains(&e.chr.field_ins_handle), game::no_dead(e.chr)))
                 .collect();
             out.sort();
             if out.is_empty() { "no enemies in range".into() } else { out.join("
@@ -1192,6 +1269,126 @@ only in game lists ({}):
             "ok".into()
         }
         // Set nearest hostile's HP to a fraction of max (to test stagger / glory kills).
+        // chrinfo NPC: HP, the game's no-death states and active SpEffects of a character
+        // (Malenia's phase change).
+        "chrinfo" => {
+            let want = num(0).map(|v| v as i32);
+            let all = game::enemies(400.0);
+            let Some(e) = all.iter().find(|e| want.is_none_or(|w| e.chr.npc_param_id == w)) else { return "none".into() };
+            let (ids, sp_nd) = game::sp_effects(e.chr);
+            format!(
+                "npc {} hp {}/{} anim {} data_no_dead {} sp_no_dead {} death_flag {} sp {:?}",
+                e.chr.npc_param_id,
+                e.chr.modules.data.hp,
+                e.chr.modules.data.max_hp,
+                crate::slayer::current_anim(e.chr),
+                game::no_dead(e.chr),
+                sp_nd,
+                e.chr.chr_flags1c5.death_flag(),
+                ids
+            )
+        }
+        // warp ROW [entity]: travel to a grace (BonfireWarpParam row) the way EMEVD WarpPlayer does:
+        // target map + entity, then the game's map move (test helper).
+        "warp" => {
+            use eldenring::cs::{BlockId, BonfireWarpParam, GameMan, SoloParamRepository};
+            use fromsoftware_shared::FromStatic;
+            let Some(row) = num(0) else { return "warp ROW [entity]".into() };
+            let Ok(repo) = (unsafe { SoloParamRepository::instance() }) else { return "no params".into() };
+            let Some(r) = repo.get::<BonfireWarpParam>(row as u32) else { return "no such grace row".into() };
+            let entity = num(1).map(|v| v as u32).unwrap_or(r.bonfire_entity_id());
+            let block = BlockId::from_parts(r.area_no(), r.grid_x_no(), r.grid_z_no(), 0);
+            let Ok(gm) = (unsafe { GameMan::instance_mut() }) else { return "no GameMan".into() };
+            gm.initial_area_entity_id = entity;
+            gm.move_map_target = block;
+            gm.warp_requested = true;
+            format!("warping to row {row}: {block:?} entity {entity} grace pos [{}, {}, {}]", r.pos_x(), r.pos_y(), r.pos_z())
+        }
+        // gracepos ROW: a grace's position in its map (BonfireWarpParam), for tp.
+        "gracepos" => {
+            use eldenring::cs::{BonfireWarpParam, SoloParamRepository};
+            use fromsoftware_shared::FromStatic;
+            let Some(row) = num(0) else { return "gracepos ROW".into() };
+            let Ok(repo) = (unsafe { SoloParamRepository::instance() }) else { return "no params".into() };
+            let Some(r) = repo.get::<BonfireWarpParam>(row as u32) else { return "no such grace row".into() };
+            format!("{} {} {} area {} grid {} {} entity {}", r.pos_x(), r.pos_y(), r.pos_z(), r.area_no(), r.grid_x_no(), r.grid_z_no(), r.bonfire_entity_id())
+        }
+        // spdmg ROW POINT [TEMPLATE]: turn a SpEffect row into an instant flat HP loss (test).
+        "spdmg" => {
+            use eldenring::cs::{SoloParamRepository, SpEffectParam};
+            use fromsoftware_shared::FromStatic;
+            let (Some(row), Some(pt)) = (num(0), num(1)) else { return "spdmg ROW POINT".into() };
+            let Ok(repo) = (unsafe { SoloParamRepository::instance_mut() }) else { return "no params".into() };
+            let Some(r) = repo.get_mut::<SpEffectParam>(row as u32) else { return "no such row".into() };
+            r.set_change_hp_point(pt as i32);
+            r.set_change_hp_rate(0.0);
+            r.set_effect_endurance(num(2).unwrap_or(0.0) as f32);
+            r.set_motion_interval(0.0);
+            r.set_effect_target_self(true);
+            r.set_effect_target_friend(true);
+            r.set_effect_target_enemy(true);
+            r.set_effect_target_player(true);
+            r.set_effect_target_ai(true);
+            r.set_effect_target_live(true);
+            format!("speffect {row}: hp point {pt}")
+        }
+        // erbullet ID NPC [OWNER_NPC]: spawn an ER bullet just in front of a character's chest, aimed
+        // at it (owner: the player, or another character) - which bullets deal real game damage.
+        "erbullet" => {
+            let (Some(id), Some(npc)) = (num(0), num(1)) else { return "erbullet ID NPC [OWNER_NPC]".into() };
+            let Some(t) = game::chrs_by_npc(npc as i32).into_iter().next() else { return "no target".into() };
+            let owner = match num(2) {
+                Some(o) => game::chrs_by_npc(o as i32).into_iter().next().map(|c| c.field_ins_handle),
+                None => game::player().map(|p| p.chr_ins.field_ins_handle),
+            };
+            let chest = game::chr_pos(t) + glam::Vec3::Y * 1.2;
+            let from = game::player().map(|p| game::chr_pos(&p.chr_ins) + glam::Vec3::Y * 1.2).unwrap_or(chest + glam::Vec3::X);
+            let dir = (chest - from).normalize_or(glam::Vec3::X);
+            let before = t.modules.data.hp;
+            let r = crate::bullet::spawn(owner, id as i32, chest - dir * 0.8, dir);
+            format!("bullet {id} at npc {npc}: {r:?} (hp {before})")
+        }
+        // speffect NPC ID: apply a SpEffect to a character through the game (test).
+        "speffect" => {
+            use eldenring::cs::ChrInsExt;
+            let (Some(npc), Some(id)) = (num(0), num(1)) else { return "speffect NPC ID".into() };
+            match game::chrs_by_npc(npc as i32).into_iter().next() {
+                Some(c) => {
+                    let before = c.modules.data.hp;
+                    c.apply_speffect(id as i32, false);
+                    format!("npc {} speffect {} (hp {before} -> {})", c.npc_param_id, id, c.modules.data.hp)
+                }
+                None => "none".into(),
+            }
+        }
+        // sethp NPC HP: set a character's HP directly (any team).
+        "sethp" => {
+            let (Some(npc), Some(v)) = (num(0), num(1)) else { return "sethp NPC HP".into() };
+            match game::chrs_by_npc(npc as i32).into_iter().next() {
+                Some(c) => {
+                    c.modules.data.hp = v as i32;
+                    format!("npc {} hp {}", c.npc_param_id, c.modules.data.hp)
+                }
+                None => "none".into(),
+            }
+        }
+        // nohit 1/0: nothing can hit the player (test fights without feeding lifesteal).
+        "nohit" => {
+            let on = num(0).map(|v| v != 0.0).unwrap_or(true);
+            match game::player() {
+                Some(p) => {
+                    p.chr_ins.debug_flags.set_disabled_hit(on);
+                    format!("nohit={on}")
+                }
+                None => "no player".into(),
+            }
+        }
+        // sethp works on dead characters too (chrs_by_npc)
+        "chrwatch" => {
+            let npc = num(0).unwrap_or(0.0) as i32;
+            WATCH_NPC.store(npc, std::sync::atomic::Ordering::Relaxed);
+            format!("watching npc {npc}")
+        }
         "wound" => {
             let frac = num(0).unwrap_or(0.1) as f32;
             let want = num(1).map(|v| v as i32);
@@ -1256,6 +1453,8 @@ only in game lists ({}):
                     Some(a) => {
                         match args.get(2).copied() {
                             Some("corr") => a.set_atk_phys_correction(v as u16),
+                            Some("magcorr") => a.set_atk_mag_correction(v as u16),
+                            Some("mag") => a.set_atk_mag(v as u16),
                             Some("add") => {
                                 a.set_atk_phys(v as u16);
                                 a.set_is_add_base_atk(true)
@@ -1370,6 +1569,7 @@ only in game lists ({}):
         "heightmap" => {
             let r = num(0).unwrap_or(8.0) as f32;
             let st = num(1).unwrap_or(1.0) as f32;
+            let filter = args.get(2).and_then(|a| u32::from_str_radix(a.trim_start_matches("0x"), 16).ok()).unwrap_or(0x2000058);
             let Some(p) = game::player() else { return "no player".into() };
             let at = game::chr_pos(&p.chr_ins);
             let n = (r / st) as i32;
@@ -1378,7 +1578,7 @@ only in game lists ({}):
                 let mut row = String::new();
                 for ix in -n..=n {
                     let q = at + glam::Vec3::new(ix as f32 * st, 0.0, iz as f32 * st);
-                    row += &match crate::slayer::ground_height(q, 3.0) {
+                    row += &match crate::slayer::ground_height_with(q, 3.0, filter) {
                         Some(h) => format!("{:>4}", ((h - at.y) * 10.0).round() as i32),
                         None => "   .".into(),
                     };
@@ -1387,6 +1587,11 @@ only in game lists ({}):
             }
             rows.join("
 ")
+        }
+        "groundfilter" => {
+            let old = args.first() == Some(&"old");
+            crate::slayer::GROUND_WORLD_ONLY.store(old, std::sync::atomic::Ordering::Relaxed);
+            format!("ground follow: {}", if old { "world filter only (old)" } else { "world + character filters" })
         }
         "mtrace" => {
             let on = args.first() == Some(&"on");
@@ -1426,8 +1631,10 @@ only in game lists ({}):
         },
         // glory [chainsaw]: force a glory kill / chainsaw on the nearest hostile (ignores facing).
         "glory" => {
+            // glory [chainsaw] [NPC]: on the nearest hostile, or on that NpcParam id
             let saw = args.first() == Some(&"chainsaw");
-            match game::enemies(60.0).iter().position(is_hostile) {
+            let want = args.iter().filter_map(|a| a.parse::<i32>().ok()).next();
+            match game::enemies(60.0).iter().position(|e| is_hostile(e) && want.is_none_or(|w| e.chr.npc_param_id == w)) {
                 Some(i) => {
                     s.start_glory(i, saw);
                     "started".into()

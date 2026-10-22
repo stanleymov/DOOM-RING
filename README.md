@@ -2,6 +2,10 @@
 
 [![Download the latest release](https://img.shields.io/badge/Download-latest%20release-c0261b?style=for-the-badge)](../../releases/latest)
 
+> **Which version do I need?** DOOM RING **1.3** needs **ELDEN RING 1.17.2** (app version 2.7.2),
+> the current game version. DOOM RING 1.2 and older only work with ELDEN RING app version 2.7.1 and
+> don't run on 1.17.2, so update to 1.3.
+
 DOOM Eternal's guns, HUD, sounds and combat music inside ELDEN RING: Doom movement (dash, double
 jump), glory kills, chainsaw, Blood Punch, Flame Belch, the Crucible, and 8 of DOOM Eternal's combat
 suites played by Doom's own music rules.
@@ -14,7 +18,7 @@ suites played by Doom's own music rules.
 ## Requirements
 
 **Both games must be installed on your PC through Steam:**
-- **ELDEN RING** (base game, app version 2.7.1);
+- **ELDEN RING** (base game, app version 2.7.2 = game version 1.17.2);
 - **DOOM Eternal** (base game; no DLC is used).
 
 The setup reads DOOM Eternal's files to build the mod, so DOOM Eternal has to stay installed while
@@ -198,7 +202,7 @@ Eternal install, like other "bring your own game files" projects.
 
 You need:
 - Windows 10/11 and Steam;
-- ELDEN RING (base game, app version 2.7.1);
+- ELDEN RING (base game, app version 2.7.2 = game version 1.17.2);
 - DOOM Eternal (base game; no DLC is used);
 - about 3 GB of free space while installing.
 

@@ -5,7 +5,7 @@ download itself contains no DOOM Eternal or ELDEN RING files. Please don't share
 holds the converted DOOM files) - share the setup instead.
 
 REQUIREMENTS
-- Windows 10/11, Steam logged in, ELDEN RING (base game, 1.16 / app 2.7.1) installed through Steam
+- Windows 10/11, Steam logged in, ELDEN RING (base game, 1.17.2 / app 2.7.2) installed through Steam
 - The game runs offline (Easy Anti-Cheat off) - that is required for mods. Never take the mod online.
 - The mod uses its own save (DOOMRING.sl2) and never touches your normal ELDEN RING save.
 

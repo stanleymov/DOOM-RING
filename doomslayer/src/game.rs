@@ -210,6 +210,50 @@ pub static SCAN_OK: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBoo
 /// A character that's fully there: its module container and its data / physics modules exist.
 /// One being built or torn down has null module pointers - the 1.1 crash read `modules.data` of
 /// one (address 0) while enemies spawned around the player.
+/// The game's "can't die" flag (CSChrDataModule debug flags at +0x19b, bit 0 - bit 1 is "no
+/// damage"): events set it on bosses during a phase change (Malenia kneels at 1 HP). The game's own
+/// damage stops at 1 HP while it's set; ours must too.
+pub fn no_dead(chr: &ChrIns) -> bool {
+    let data = &*chr.modules.data as *const _ as *const u8;
+    unsafe { data.add(0x19b).read() & 1 != 0 }
+}
+
+/// Active SpEffect param ids on a character, and whether any of them has the param's "noDead"
+/// (HP can't run out: bosses mid phase change).
+pub fn sp_effects(chr: &ChrIns) -> (Vec<i32>, bool) {
+    let mut ids = Vec::new();
+    let mut no_dead = false;
+    for e in chr.special_effect.entries() {
+        ids.push(e.param_id);
+        if let Some(p) = e.param_data {
+            if unsafe { p.as_ref() }.no_dead() {
+                no_dead = true;
+            }
+        }
+        if ids.len() >= 64 {
+            break;
+        }
+    }
+    (ids, no_dead)
+}
+
+/// Every loaded character with this NpcParam id, dead or alive (test watch).
+pub fn chrs_by_npc(npc: i32) -> Vec<&'static mut ChrIns> {
+    let Some(w) = world() else { return vec![] };
+    let mut out = Vec::new();
+    let mut seen = std::collections::HashSet::new();
+    for (ptr, _) in all_characters(w) {
+        if !seen.insert(ptr as usize) || !chr_ok(ptr) {
+            continue;
+        }
+        let chr = unsafe { &mut *ptr };
+        if chr.npc_param_id == npc {
+            out.push(chr);
+        }
+    }
+    out
+}
+
 pub fn chr_ok(chr: *const ChrIns) -> bool {
     if chr.is_null() {
         return false;

@@ -31,6 +31,7 @@ PACKAGE = HERE.parent
 TOOLS = HERE / "tools"
 BIN = PACKAGE / "bin"
 PAYLOAD = PACKAGE / "payload"
+OBSOLETE = ("license/fromsoftware-rs-LICENSE-MIT.txt", "license/fromsoftware-rs-LICENSE-APACHE.txt")
 # (development: run from the repo - installer/engine.py with tools/ beside it)
 if not TOOLS.exists():
     TOOLS = HERE.parent / "tools"
@@ -93,7 +94,7 @@ def find_app(app_id):
 
 
 def file_version(path):
-    """'2.7.1.0'-style file version of an exe (Windows), or None."""
+    """'2.7.2.0'-style file version of an exe (Windows), or None."""
     try:
         size = ctypes.windll.version.GetFileVersionInfoSizeW(str(path), None)
         if not size:
@@ -118,8 +119,8 @@ def check_elden_ring(path):
         return False, f"No Game\\eldenring.exe in {path}. Is this the ELDEN RING folder?"
     ver = file_version(exe)
     msg = f"Found: {path}" + (f"  (version {ver})" if ver else "")
-    if ver and not ver.startswith("2.7.1"):
-        msg += "\nNote: DOOM RING was made for ELDEN RING 1.16 (2.7.1). Other versions may not work."
+    if ver and not ver.startswith("2.7.2"):
+        msg += "\nNote: DOOM RING was made for ELDEN RING 1.17.2 (app 2.7.2). Other versions may not work."
     return True, msg
 
 
@@ -295,6 +296,10 @@ class Installer:
                 # (a reinstall keeps the player's settings)
                 dst.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(src, dst)
+        # files an older version installed that this one replaced (1.3: fromsoftware-rs's licences
+        # are now the NON-AI variants)
+        for rel in OBSOLETE:
+            (self.target / rel).unlink(missing_ok=True)
         self.log(f"mod files -> {self.target}")
 
     def get_ffmpeg(self):

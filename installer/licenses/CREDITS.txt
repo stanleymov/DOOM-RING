@@ -10,7 +10,7 @@ Mods and libraries inside DOOM RING
 -----------------------------------
 - me3 - the mod loader that starts ELDEN RING with the mod                 MIT / Apache-2.0
 - erfps2 by Dasaav - the first-person camera (DOOM RING uses its own fork)  MIT / Apache-2.0
-- fromsoftware-rs - ELDEN RING's game structures for Rust                  MIT / Apache-2.0
+- fromsoftware-rs - ELDEN RING's game structures for Rust                  MIT / Apache-2.0 (NON-AI variants)
 - hudhook - draws the DOOM HUD, guns and menus over the game              MIT
   - MinHook (inside hudhook) - function hooking                            BSD-2-Clause
 - rodio and the other Rust libraries (serde, toml, glam, windows-rs, pelite, png, fastrand, log,

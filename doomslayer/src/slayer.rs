@@ -162,6 +162,8 @@ pub struct Glory {
     placed: bool,
     /// Out of ammo at a boss: the chainsaw only refills the ammo - no damage, no lunge (user).
     boss_ammo: bool,
+    /// Ground height at the goal (where the demon stands): over a gap the lunge heads for it.
+    goal_floor: Option<f32>,
 }
 
 pub struct Slayer {
@@ -336,6 +338,20 @@ pub struct Slayer {
     /// Boss bars for the HUD (name, hp, max): read here on the game's thread - the HUD used to scan
     /// every character from the render thread each frame, racing the game (the 1.1 crash).
     pub boss_bars: Vec<(String, i32, i32)>,
+    /// No fall-through rescue before this time (after cutscenes / event animations / fades).
+    rescue_after: f32,
+    /// Where an unjumped fall started (position, ground velocity) and whether it was logged:
+    /// finds the spots where the body slips through stairs / floors (diagnostic only).
+    fall_from: Option<(Vec3, Vec3)>,
+    fall_logged: bool,
+    /// Body position last frame and when a fast move was last logged (diagnostic: a glory kill
+    /// sent the player flying ~30 m, user).
+    fling_last: Option<(Vec3, f32, bool)>,
+    /// Glory kill diagnosis (user): per-frame "[glory]" log lines until this time after a kill,
+    /// and the map-section origin last frame.
+    glory_log_until: f32,
+    glory_log_chunk: Option<Vec3>,
+    fling_logged_at: f32,
     /// The game's HP pool and max this frame, for the HUD (no game reads on the render thread).
     pub hud_pool: (i32, i32),
     boss_crucible: u32,
@@ -564,6 +580,19 @@ fn set_no_dead(on: bool) {
 
 /// Where the meathook grabs a character: chest height for its body size (trolls and giants used
 /// to be hooked by the ankle / pelvis at a fixed 1.2 m).
+/// Heights up the body the meathook may aim at: the fixed points for people and trolls, plus
+/// points up the whole body of anything taller (the Fire Giant is 20+ m: aiming at his body found
+/// nothing, only his shins counted - user, 1.3).
+fn hook_aim_heights(chr: &eldenring::cs::ChrIns) -> Vec<f32> {
+    let mut hs = vec![1.0f32, 0.4, 2.0, 3.5, 5.0];
+    let ph = &chr.modules.physics;
+    let h = ph.chr_hit_height.max(ph.hit_height);
+    if h.is_finite() && h > 6.0 && h < 60.0 {
+        hs.extend([0.25, 0.5, 0.72, 0.9].map(|f| f * h));
+    }
+    hs
+}
+
 fn hook_grip(chr: &eldenring::cs::ChrIns) -> f32 {
     let ph = &chr.modules.physics;
     let h = ph.chr_hit_height.max(ph.hit_height);
@@ -728,6 +757,13 @@ impl Slayer {
             crucible_charges: 0,
             boss_seen: HashMap::new(),
             boss_bars: Vec::new(),
+            rescue_after: 0.0,
+            fall_from: None,
+            fall_logged: false,
+            fling_last: None,
+            glory_log_until: 0.0,
+            glory_log_chunk: None,
+            fling_logged_at: 0.0,
             hud_pool: (0, 0),
             boss_crucible: 0,
             boss_crucible_at: 0.0,
@@ -1117,7 +1153,9 @@ impl Slayer {
     /// bar shows (a field dragon walked up to died to the Crucible - user).
     fn is_boss(chr: &eldenring::cs::ChrIns) -> bool {
         let bosses = game::active_boss_handles();
-        let direct = |c: &eldenring::cs::ChrIns| bosses.contains(&c.field_ins_handle) || params::is_area_boss(c.event_entity_id);
+        let direct = |c: &eldenring::cs::ChrIns| {
+            bosses.contains(&c.field_ins_handle) || params::is_area_boss(c.event_entity_id) || damage::boss_part(c)
+        };
         if direct(chr) {
             return true;
         }
@@ -1230,7 +1268,8 @@ impl Slayer {
                 let reach = (hit.dist + 0.5).min(w.range);
                 self.break_along(cam_pos, dir, reach, 0.1);
             }
-            if let Some(h) = hit.chr {
+            // (rockets / BFG: their direct hit lands with the projectile, see the blast below)
+            if let Some(h) = hit.chr.filter(|_| blast_r <= 0.0) {
                 // BFG and the Precision Bolt: what they can kill dies - no stagger catch (user)
                 damage::NO_CATCH.store(self.weapon == BFG || bolt, std::sync::atomic::Ordering::Relaxed);
                 let res = damage::apply_handle(h, direct * mult);
@@ -1257,7 +1296,11 @@ impl Slayer {
                     er_blast: Some(self.weapon as i32),
                     origin: hit.pos - dir * hit.dist,
                     total: travel.max(1e-3),
+                    direct: hit.chr.map(|h| (h, direct * mult)),
                 });
+                if hit.chr.is_some() {
+                    landed += 1;
+                }
             }
         }
         // Enemy reaction: one real ER hit per demon per shot, spawned right at its body (an
@@ -1583,6 +1626,8 @@ impl Slayer {
                 let k = (1.0 - b.t / b.total).clamp(0.0, 1.0);
                 let at = b.origin.lerp(b.at, k);
                 b.at = at;
+                // blown up before it got there: no direct hit
+                b.direct = None;
                 b.t = 0.0;
                 crate::fx::cut_rocket(at);
                 audio::play("rocket_detonate");
@@ -2102,6 +2147,7 @@ impl Slayer {
             audio::play_vol("belch_ready", 0.6);
         }
         self.belch_cd = (self.belch_cd - dt).max(0.0);
+        damage::tick_finisher();
         self.dash_charges = (self.dash_charges + dt / self.cfg.dash_recharge).min(DASH_CHARGES);
         let now_t = self.time;
         let mut blasted = false;
@@ -2111,6 +2157,10 @@ impl Slayer {
             b.t -= dt;
             if b.t <= 0.0 {
                 damage::NO_CATCH.store(b.er_blast == Some(BFG as i32), std::sync::atomic::Ordering::Relaxed);
+                // the projectile's direct hit, now that it has arrived
+                if let Some((h, amount)) = b.direct.take() {
+                    let _ = damage::apply_handle(h, amount);
+                }
                 if damage::explode(b.at, b.radius, b.amount) > 0 {
                     blasted = true;
                 }
@@ -2443,8 +2493,12 @@ impl Slayer {
         }
         let ssg_len = viewmodel::clip_len(viewmodel::FOLDERS[SUPER_SHOTGUN], "fire").unwrap_or(1.53);
         let ssg_busy = (self.vm_clip == "fire" && self.vm_t < ssg_len * 0.89) || self.vm_clip == "fire_single" || !self.vm_queue.is_empty();
-        if self.weapon == SUPER_SHOTGUN && self.input.pressed3(k.alt_fire, k.alt_fire_alt, k.alt_fire_pad) {
+        // (not with the Crucible out: the Super Shotgun is only the gun underneath it - user)
+        if self.weapon == SUPER_SHOTGUN && !self.crucible_out && self.input.pressed3(k.alt_fire, k.alt_fire_alt, k.alt_fire_pad) {
             self.hook_buffer = 0.4;
+        }
+        if self.crucible_out {
+            self.hook_buffer = 0.0;
         }
         self.hook_buffer = (self.hook_buffer - dt).max(0.0);
         if self.weapon == SUPER_SHOTGUN && self.hook_buffer > 0.0 && self.hook.is_none() && self.hook_cd <= 0.0 && !ssg_busy {
@@ -2677,11 +2731,18 @@ impl Slayer {
             alive.insert(key);
             if let Some((t, prev)) = self.burning.get_mut(&key) {
                 *t -= dt;
-                if e.hp() < *prev {
-                    // Doom: damaging a burning demon sheds armor shards.
-                    shard_bursts.push((e.pos() + Vec3::Y * 1.2, 1 + ((*prev - e.hp()) / 80) as usize));
+                // (a boss's body: its boss bar's HP is the one that drops)
+                let hp = damage::effective_hp(e.chr);
+                if hp < *prev {
+                    // Doom: damaging a burning demon sheds armor shards. From the side facing
+                    // you: a giant's centre is between its feet, metres away.
+                    let me = game::player().map(|p| game::chr_pos(&p.chr_ins)).unwrap_or(e.pos());
+                    let flat = Vec3::new(me.x - e.pos().x, 0.0, me.z - e.pos().z);
+                    let edge = e.chr.modules.physics.hit_radius.clamp(0.0, (flat.length() - 1.0).max(0.0));
+                    let at = e.pos() + flat.normalize_or_zero() * edge + Vec3::Y * 1.2;
+                    shard_bursts.push((at, 1 + ((*prev - hp) / 80) as usize));
                 }
-                *prev = e.hp();
+                *prev = hp;
             }
         }
         self.burning.retain(|k, (t, _)| *t > 0.0 && alive.contains(k));
@@ -2717,15 +2778,25 @@ impl Slayer {
         // and doesn't hurt it (user). Big bodies: in reach of its edge, not its centre.
         let boss_saw = if self.glory.is_none() && (saw_pressed || saw_click) && alive && self.saw_mode {
             let bosses = game::active_boss_handles();
+            // (a boss's body counts too - the Fire Giant's legs, user)
+            let boss_like = |e: &Enemy| bosses.contains(&e.chr.field_ins_handle) || damage::boss_part(e.chr);
             game::camera().and_then(|(cam, fwd)| {
-                enemies
-                    .iter()
-                    .enumerate()
-                    .filter(|(_, e)| bosses.contains(&e.chr.field_ins_handle))
-                    .filter(|(_, e)| e.dist <= self.cfg.chainsaw_range + e.chr.modules.physics.hit_radius.max(0.5) + 1.0)
-                    .filter(|(_, e)| (e.pos() - cam).normalize_or_zero().dot(fwd) > 0.35)
-                    .min_by(|a, b| a.1.dist.total_cmp(&b.1.dist))
-                    .map(|(i, _)| i)
+                // whatever boss / boss part is right under the crosshair within reach (a giant's
+                // centre is between its feet: facing one leg failed the angle test below)
+                let reach = self.cfg.chainsaw_range + 1.5;
+                let under = damage::trace(cam, fwd, reach + 1.0, 0.3).chr.and_then(|h| {
+                    enemies.iter().position(|e| e.chr.field_ins_handle == h && boss_like(e))
+                });
+                under.or_else(|| {
+                    enemies
+                        .iter()
+                        .enumerate()
+                        .filter(|(_, e)| boss_like(e))
+                        .filter(|(_, e)| e.dist <= self.cfg.chainsaw_range + e.chr.modules.physics.hit_radius.max(0.5) + 1.0)
+                        .filter(|(_, e)| (e.pos() - cam).normalize_or_zero().dot(fwd) > 0.35)
+                        .min_by(|a, b| a.1.dist.total_cmp(&b.1.dist))
+                        .map(|(i, _)| i)
+                })
             })
         } else {
             None
@@ -2776,12 +2847,16 @@ impl Slayer {
             self.belch_cd = BELCH_COOLDOWN;
             let mut lit = 0;
             if let Some((cam, fwd)) = game::camera() {
+                // (what's under the crosshair counts too: a giant's centre is between its feet)
+                let aimed = damage::trace(cam, fwd, 14.0, 0.3).chr;
                 for e in &enemies {
                     let to = e.pos() - cam;
-                    // range 12 m (user; was 9)
-                    if e.dist < 12.0 && to.normalize_or_zero().dot(fwd) > 0.6 && is_hostile(e) {
+                    // range 12 m (user; was 9), from the body's edge
+                    let edge_dist = (e.dist - e.chr.modules.physics.hit_radius.clamp(0.0, 10.0)).max(0.0);
+                    let in_front = to.normalize_or_zero().dot(fwd) > 0.6 || aimed == Some(e.chr.field_ins_handle);
+                    if edge_dist < 12.0 && in_front && is_hostile(e) {
                         let key = &*e.chr as *const _ as usize;
-                        self.burning.insert(key, (BURN_TIME, e.hp()));
+                        self.burning.insert(key, (BURN_TIME, damage::effective_hp(e.chr)));
                         lit += 1;
                     }
                 }
@@ -2899,6 +2974,19 @@ impl Slayer {
         };
         let locked = game::lock_on(e.chr.field_ins_handle);
         log::info!("glory target npc {} dist {:.1} lock-on {locked}", e.chr.npc_param_id, e.dist);
+        log::info!(
+            "[glory] start npc {} {} {} | from {from} to {to} | target {} (dy {:+.2}) dist {:.2} | ground under me {:?} under goal {:?} | on ground {} | section {:?}",
+            e.chr.npc_param_id,
+            if chainsaw { "chainsaw" } else { "glory" },
+            if self.cfg.glory_teleport { "teleport" } else { "lunge" },
+            e.pos(),
+            e.pos().y - from.y,
+            e.dist,
+            ground_height(from, 1.5),
+            ground_height(to, 3.0),
+            p.chr_ins.modules.physics.is_touching_ground,
+            [p.chr_ins.chunk_position.0, p.chr_ins.chunk_position.1, p.chr_ins.chunk_position.2]
+        );
         self.glory = Some(Glory {
             target: &*e.chr as *const _ as usize,
             t: 0.0,
@@ -2907,6 +2995,7 @@ impl Slayer {
             chainsaw,
             placed: false,
             boss_ammo: false,
+            goal_floor: ground_height(to, 3.0),
         });
         // (no "CHAINSAW!" text - user; glory kills keep theirs)
         if !chainsaw {
@@ -2945,6 +3034,10 @@ impl Slayer {
         let boss_ammo = g.boss_ammo;
         let spot = g.to;
         self.glory = None;
+        self.glory_log_until = self.time + 2.0;
+        if let Some(p) = game::player() {
+            log::info!("[glory] end: player at {} | goal was {spot} ({:.2} m off)", game::chr_pos(&p.chr_ins), game::chr_pos(&p.chr_ins).distance(spot));
+        }
         game::release_lock_on();
         if !chainsaw {
             // The finishing blow: a heavy right hook as the demon goes down.
@@ -3132,7 +3225,7 @@ impl Slayer {
             // Aim points up the body: critters near the ground, people at the chest, trolls and
             // other giants several metres up (the old 0.7 m point failed the cone on them).
             .map(|e| {
-                let best = [0.4f32, 1.0, 2.0, 3.5, 5.0]
+                let best = hook_aim_heights(e.chr)
                     .iter()
                     .map(|h| (e.pos() + Vec3::Y * *h - cam).normalize_or_zero().dot(fwd))
                     .fold(-1.0f32, f32::max);
@@ -3141,7 +3234,7 @@ impl Slayer {
             .filter(|(d, _)| *d > 0.97)
             // Must be able to see it: the hook flew blind into walls/terrain before.
             .filter(|(_, e)| {
-                [1.0f32, 0.4, 2.0, 3.5, 5.0].iter().any(|h| {
+                hook_aim_heights(e.chr).iter().any(|h| {
                     let aim = e.pos() + Vec3::Y * *h;
                     damage::trace(cam, aim - cam, (aim - cam).length() + 1.0, 0.1).chr == Some(e.chr.field_ins_handle)
                 })
@@ -3177,7 +3270,7 @@ impl Slayer {
         // Flaming Hook (mastered, Doom's double_barrel_meat_hook_flame): the demon burns for
         // 1.5 s - damaging it meanwhile sheds armor shards, like the Flame Belch.
         let key = &*e.chr as *const _ as usize;
-        self.burning.insert(key, (HOOK_BURN_TIME, e.hp()));
+        self.burning.insert(key, (HOOK_BURN_TIME, damage::effective_hp(e.chr)));
         let owner = game::player().map(|p| p.chr_ins.field_ins_handle);
         let chest = e.pos() + Vec3::Y * hook_grip(e.chr);
         let _ = bullet::spawn_capped(bullet::CAP_FX, owner, params::FX_BELCH_BULLET, chest - fwd * 0.6, fwd);
@@ -3753,7 +3846,8 @@ impl Slayer {
         let mut seen = HashMap::new();
         self.marked.retain(|h| enemies.iter().any(|e| e.chr.field_ins_handle == *h && e.dist < 60.0));
         for e in enemies.iter().filter(|e| is_hostile(e) && e.dist < 60.0) {
-            if active_bosses.contains(&e.chr.field_ins_handle) {
+            // (a boss's body too: its HP is the top boss bar's - the Fire Giant showed both, user)
+            if active_bosses.contains(&e.chr.field_ins_handle) || damage::boss_part(e.chr) {
                 continue;
             }
             let marked = self.marked.contains(&e.chr.field_ins_handle);
@@ -4445,6 +4539,8 @@ impl Slayer {
         let ladder = game::on_ladder(&p.chr_ins);
         let dead = p.chr_ins.modules.data.hp <= 0;
         let model_y = p.chr_ins.chr_ctrl.model_matrix.3.1;
+        let chunk = Vec3::new(p.chr_ins.chunk_position.0, p.chr_ins.chunk_position.1, p.chr_ins.chunk_position.2);
+        let block = p.chr_ins.block_id.0;
         let ph = &mut p.chr_ins.modules.physics;
         let pos = game::hpos(&ph.position);
         let mut delta = Vec3::ZERO;
@@ -4455,6 +4551,30 @@ impl Slayer {
             camera_step(0.0);
             return;
         }
+        // Map-section change: the game re-bases every body position on the new section's origin
+        // (e.g. [8, -8, -32] in Stormveil). The lunge's start / goal / hold spot stay in the old
+        // numbers otherwise, and the next step became 30 m long: the "glory kill sent me flying"
+        // (user; the [glory] log showed a SECTION CHANGE in every one of those).
+        if let Some(prev) = self.glory_log_chunk.filter(|c| *c != chunk) {
+            let shift = chunk - prev;
+            if let Some(g) = self.glory.as_mut() {
+                g.from += shift;
+                g.to += shift;
+                if let Some(f) = g.goal_floor.as_mut() {
+                    *f += shift.y;
+                }
+            }
+            if let Some((h, _)) = self.glory_hold.as_mut() {
+                *h += shift;
+            }
+        }
+        // (a section change during a glory kill, for the log)
+        if self.glory.is_some() || self.time < self.glory_log_until {
+            if let Some(c) = self.glory_log_chunk.filter(|c| *c != chunk) {
+                log::info!("[glory] map section change mid kill: shift {} - lunge moved along", chunk - c);
+            }
+        }
+        self.glory_log_chunk = Some(chunk);
         if dead {
             // Dying (e.g. off a cliff): the game's death camera and fall, nothing of ours - air
             // control kept steering the body and the view drifted.
@@ -4526,7 +4646,16 @@ impl Slayer {
         // dropping and there is a floor *above* us right where we were standing a moment ago,
         // put us back on it. Real falls off ledges have no floor overhead and are left alone.
         let t_now = self.time;
-        if ph.is_touching_ground {
+        // The game moving us (cutscenes, door / lever / fog animations, fades) is no fall-through:
+        // a door cutscene put the player on the far side 2.9 m lower and this sent them back into
+        // the room (user, 1.3). No rescue during those and for 2 s after.
+        if game::in_cutscene() || self.in_event.is_some() || game::screen_faded() {
+            self.last_safe = None;
+            self.rescue_after = t_now + 2.0;
+        }
+        if t_now < self.rescue_after {
+            self.last_safe = None;
+        } else if ph.is_touching_ground {
             self.last_safe = Some((pos, t_now));
         } else if let Some((safe, at)) = self.last_safe.filter(|(s, _)| Vec3::new(s.x - pos.x, 0.0, s.z - pos.z).length() < 10.0) {
             // (a stored spot more than 10 m away sideways is from before a teleport / tile
@@ -4607,6 +4736,53 @@ impl Slayer {
         if on_ground {
             self.air_peak_y = pos.y;
             self.air_jumped = false;
+        }
+        // Fall log: an unjumped drop of more than 3 m says where it started and whether a floor
+        // is still above us there (= slipped through it, e.g. stairs in the Ashen Capital, user).
+        if on_ground {
+            self.fall_from = None;
+        } else if self.was_on_ground && !self.air_jumped && self.air_vy.is_none() {
+            self.fall_from = Some((pos, self.ground_vel));
+            self.fall_logged = false;
+        }
+        // Fling log: the body moving faster than any of our moves (dash ~ 25 m/s) without a warp.
+        // (timed by our clock: frames skipped by the early returns above count too)
+        // (dashes run ~50 m/s and glory lunges ~40: only moves none of ours made, this frame or the last)
+        let ours = self.dash_t > 0.0 || self.glory.is_some() || self.hook.is_some();
+        if let Some((last, at, was_ours)) = self.fling_last.filter(|&(_, at, _)| self.time - at > 1e-4 && self.time - at < 0.25) {
+            let dt = self.time - at;
+            let flat = Vec3::new(pos.x - last.x, 0.0, pos.z - last.z).length();
+            let speed = flat / dt;
+            if speed > 20.0 && flat < 20.0 && !ours && !was_ours && self.time - self.fling_logged_at > 0.5 {
+                self.fling_logged_at = self.time;
+                log::warn!(
+                    "fling: {speed:.0} m/s ({flat:.2} m in {dt:.3} s) at {pos}, ground {} glory {} hook {} dash {:.2} air_carry {} ground_vel {} anim {}",
+                    ph.is_touching_ground,
+                    self.glory.is_some(),
+                    self.hook.is_some(),
+                    self.dash_t,
+                    self.air_carry,
+                    self.ground_vel,
+                    self.last_anim
+                );
+            }
+        }
+        self.fling_last = Some((pos, self.time, ours));
+        if let Some((from, vel)) = self.fall_from.filter(|_| !self.fall_logged) {
+            let drop = from.y - pos.y;
+            // (more than 30 m sideways is a teleport / map re-base, not a fall)
+            let side = Vec3::new(from.x - pos.x, 0.0, from.z - pos.z).length();
+            if drop > 3.0 && side > 30.0 {
+                self.fall_logged = true;
+            } else if drop > 3.0 {
+                self.fall_logged = true;
+                let above = raycast::cast_sphere(pos + Vec3::Y * 0.3, Vec3::Y * (drop + 1.0), 0.15, WORLD_FILTER, |h| !raycast::is_chr_hit(h));
+                let at_from = ground_height(from, STEP_HEIGHT + 0.1);
+                log::warn!(
+                    "fall: {drop:.1} m from {from} (block {block:08x}, ground there {at_from:?}) moving {vel}, now {pos}; overhead {:?}",
+                    above.map(|h| (h.normal.y, h.segment * (drop + 1.0)))
+                );
+            }
         }
         // Doom ground movement: near-instant acceleration to a fixed speed, instant stop.
         if self.cfg.doom_move {
@@ -4762,7 +4938,7 @@ impl Slayer {
             let want = g.from.lerp(g.to, a);
             // Breakables in the way are smashed and lunged through while they break, like a dash
             // (church walls still stop you) - user.
-            let (gfrom, gto, gt) = (g.from, g.to, g.t);
+            let (gfrom, gto, gt, goal_floor) = (g.from, g.to, g.t, g.goal_floor);
             if gt < GLORY_LUNGE_TIME {
                 let flat = Vec3::new(gto.x - gfrom.x, 0.0, gto.z - gfrom.z);
                 let left = Vec3::new(gto.x - pos.x, 0.0, gto.z - pos.z).length() + 0.6;
@@ -4776,12 +4952,19 @@ impl Slayer {
             let next = pos + Vec3::new(mv.x, 0.0, mv.z);
             // In the air the lunge pulls you down to the ground as well (user): the floor up to
             // 30 m below, reached by the end of the lunge. On the ground: the usual step follow.
-            let y = match ground_height(next, 1.5) {
+            let near = ground_height(next, 1.5);
+            let far = raycast::cast_sphere(next + Vec3::Y * 0.5, Vec3::NEG_Y * 30.0, 0.25, WORLD_FILTER, |h| !raycast::is_chr_hit(h))
+                .filter(|h| h.normal.y > 0.35 && h.segment > 0.01)
+                .map(|h| next.y + 0.5 - h.segment * 30.0 - 0.25);
+            // No ground under the next step (over a gap, or in the air): head for the ground where the
+            // demon stands, reached by the end of the lunge - not the floor below the gap, which
+            // dropped you into the hole (user, [glory] log). No ground at the goal either: the floor
+            // below as before.
+            let y = match near {
                 Some(gy) => gy,
-                None => raycast::cast_sphere(next + Vec3::Y * 0.5, Vec3::NEG_Y * 30.0, 0.25, WORLD_FILTER, |h| !raycast::is_chr_hit(h))
-                    .filter(|h| h.normal.y > 0.35 && h.segment > 0.01)
-                    .map(|h| {
-                        let gy = next.y + 0.5 - h.segment * 30.0 - 0.25;
+                None => goal_floor
+                    .or(far)
+                    .map(|gy| {
                         let left = ((GLORY_LUNGE_TIME - gt) / dt.max(1e-3)).max(1.0);
                         pos.y + (gy - pos.y) / left
                     })
@@ -4959,10 +5142,32 @@ fn muzzle_world() -> Option<Vec3> {
 /// rolls, so stairs and lips become a smooth ramp instead of tread-to-tread snaps (the stair
 /// jitter), and an edge contact is never rejected as "not walkable" (snagging on small lips).
 pub fn ground_height(at: Vec3, step: f32) -> Option<f32> {
+    let world = ground_height_with(at, step, WORLD_FILTER);
+    if GROUND_WORLD_ONLY.load(std::sync::atomic::Ordering::Relaxed) {
+        return world;
+    }
+    // The higher of the two: where the camera filter misses a walk surface the body stands on, the
+    // character filter has it; everywhere else the answer stays what it was.
+    match (world, ground_height_with(at, step, CHR_GROUND_FILTER)) {
+        (Some(a), Some(b)) => Some(a.max(b)),
+        (a, b) => a.or(b),
+    }
+}
+
+/// Bridge `groundfilter old|new`: A/B test (old = WORLD_FILTER only).
+pub static GROUND_WORLD_ONLY: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// What the player's body stands on (character collision). WORLD_FILTER (0x2000058, erfps2's camera
+/// filter) misses some of it: the ramp under the Ashen Capital's broken stairs, so the ground follow
+/// pulled you through the steps to the floor 0.9 m below (user, 1.3; A/B tested on those stairs).
+const CHR_GROUND_FILTER: u32 = 0x2000040;
+
+/// ground_height with a given collision filter (stair look-dev).
+pub fn ground_height_with(at: Vec3, step: f32, filter: u32) -> Option<f32> {
     const R: f32 = 0.3;
     let from = at + Vec3::Y * (step + R);
     let len = 2.0 * step;
-    let hit = raycast::cast_sphere(from, Vec3::NEG_Y * len, R, 0x2000058, |h| {
+    let hit = raycast::cast_sphere(from, Vec3::NEG_Y * len, R, filter, |h| {
         !raycast::is_chr_hit(h)
             && h.field_ins_handle().is_none_or(|f| {
                 !matches!(f.selector.field_ins_type(), Some(eldenring::cs::FieldInsType::Bullet))
@@ -4984,7 +5189,7 @@ pub fn ground_height(at: Vec3, step: f32) -> Option<f32> {
         let contact = Vec3::from(hit.pos);
         let centre = Vec3::new(at.x, gy + R, at.z);
         let out = Vec3::new(contact.x - centre.x, 0.0, contact.z - centre.z).normalize_or_zero() * 0.06;
-        let top = raycast::cast_sphere(contact + out + Vec3::Y * 0.25, Vec3::NEG_Y * 0.5, 0.03, 0x2000058, |h| !raycast::is_chr_hit(h));
+        let top = raycast::cast_sphere(contact + out + Vec3::Y * 0.25, Vec3::NEG_Y * 0.5, 0.03, filter, |h| !raycast::is_chr_hit(h));
         if !top.is_some_and(|t| t.normal.y > 0.7) {
             return None;
         }

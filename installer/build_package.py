@@ -91,8 +91,9 @@ def mod_licences(d):
     for f in ("LICENSE-MIT", "LICENSE-APACHE"):
         shutil.copy2(REPO / "erfps2" / f, d / f"erfps2-{f}.txt")
         shutil.copy2(PORTABLE / "me3" / f, d / f"me3-{f}.txt")
-    shutil.copy2(REPO / "erfps2" / "fromsoftware-rs" / "LICENSE-MIT", d / "fromsoftware-rs-LICENSE-MIT.txt")
-    shutil.copy2(REPO / "erfps2" / "fromsoftware-rs" / "LICENSE-ASL2", d / "fromsoftware-rs-LICENSE-APACHE.txt")
+    # (fromsoftware-rs's licences are the "NON-AI" variants since its 1.17.2 update)
+    shutil.copy2(REPO / "erfps2" / "fromsoftware-rs" / "LICENSE-MIT-NON-AI", d / "fromsoftware-rs-LICENSE-MIT-NON-AI.txt")
+    shutil.copy2(REPO / "erfps2" / "fromsoftware-rs" / "LICENSE-ASL2-NON-AI", d / "fromsoftware-rs-LICENSE-APACHE-NON-AI.txt")
     shutil.copy2(REPO / "vendor" / "hudhook" / "LICENSE", d / "hudhook-LICENSE.txt")
     shutil.copy2(REPO / "vendor" / "hudhook" / "vendor" / "minhook" / "LICENSE.txt", d / "MinHook-LICENSE.txt")
     shutil.copy2(PORTABLE / "game" / "natives" / "doom_ui" / "OFL.txt", d / "ChakraPetch-OFL.txt")

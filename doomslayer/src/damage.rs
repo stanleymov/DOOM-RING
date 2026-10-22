@@ -180,13 +180,158 @@ pub static KILLS: std::sync::Mutex<Vec<(usize, Vec3, i32)>> = std::sync::Mutex::
 /// Set while BFG damage is applied: no stagger catch - what it can kill dies (user).
 pub static NO_CATCH: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
+/// The boss-bar character a hit character belongs to, when the bar isn't its own. Some bosses are
+/// two characters: the Fire Giant's body (entity 1052520801) takes the hits and the game passes its
+/// damage to an invisible boss character (1052520800) that owns the bar. Doom damage writes HP
+/// directly, so it skipped that hand-off and the bar never moved (user, 1.3). Same team, entity ids
+/// next to each other (same map block), and that character's bar on screen.
+/// The HP that counts for this character: its boss bar's when it's a boss's body (burn / shard
+/// tracking: the body's own HP no longer moves, user 1.3).
+pub fn effective_hp(chr: &eldenring::cs::ChrIns) -> i32 {
+    bar_owner(chr).map(|o| o.modules.data.hp).unwrap_or(chr.modules.data.hp)
+}
+
+/// Part of a boss whose bar belongs to another character (the Fire Giant's body).
+pub fn boss_part(chr: &eldenring::cs::ChrIns) -> bool {
+    bar_owner(chr).is_some()
+}
+
+fn bar_owner(chr: &eldenring::cs::ChrIns) -> Option<&'static mut eldenring::cs::ChrIns> {
+    let bars = game::active_boss_handles();
+    if chr.event_entity_id <= 0 || bars.contains(&chr.field_ins_handle) {
+        return None;
+    }
+    // Malenia's five helper characters (npc 21202xxx, same team, ids next to hers) are no body of
+    // hers: pairing them sent hits on them into her bar and killed her mid phase change (user, 1.3).
+    if chr.npc_param_id / 1000 == 21202 {
+        return None;
+    }
+    let w = game::world()?;
+    for h in bars {
+        let Some(b) = w.chr_ins_by_handle_mut(&h) else { continue };
+        if !game::chr_ok(b as *const _) || b.team_type != chr.team_type || b.event_entity_id <= 0 {
+            continue;
+        }
+        let gap = (b.event_entity_id as i64 - chr.event_entity_id as i64).abs();
+        // (also while its HP is 0: at a phase change the game keeps the bar and refills it - the
+        // body must stay part of the boss meanwhile, not turn into a normal enemy - user, 1.3)
+        if gap <= 10 {
+            let b: *mut eldenring::cs::ChrIns = b;
+            return Some(unsafe { &mut *b });
+        }
+    }
+    None
+}
+
+/// One real Elden Ring hit on Malenia (see apply): a dart spawned at her chest carrying the Fire
+/// Pot's goods id, which makes the game compute real damage (bullets without one deal 0). At most
+/// one every 0.3 s.
+fn malenia_finisher(chr: &eldenring::cs::ChrIns) {
+    use std::sync::Mutex;
+    use std::time::Instant;
+    static LAST: Mutex<Option<Instant>> = Mutex::new(None);
+    let mut last = LAST.lock().unwrap_or_else(|e| e.into_inner());
+    if last.is_some_and(|t| t.elapsed().as_secs_f32() < 0.3) {
+        return;
+    }
+    *last = Some(Instant::now());
+    let Some(p) = game::player() else { return };
+    let chest = game::chr_pos(chr) + Vec3::Y * 1.2;
+    let from = game::chr_pos(&p.chr_ins) + Vec3::Y * 1.2;
+    let dir = (chest - from).normalize_or(Vec3::X);
+    let r = crate::bullet::spawn_ex(Some(p.chr_ins.field_ins_handle), crate::params::FINISHER_BULLET, chest - dir * 0.4, dir, crate::params::FINISHER_GOODS);
+    let mut held = HELD.lock().unwrap_or_else(|e| e.into_inner());
+    let tries = match held.as_mut() {
+        Some((h, _, n)) if *h == chr.field_ins_handle => {
+            *n += 1;
+            *n
+        }
+        _ => {
+            *held = Some((chr.field_ins_handle, Instant::now(), 1));
+            1
+        }
+    };
+    if tries == 1 || tries % 10 == 0 {
+        log::info!("Malenia npc {} at {} HP: the game's own hit ends the phase (try {tries}, {r:?})", chr.npc_param_id, chr.modules.data.hp);
+    }
+}
+
+/// Malenia held at 2 HP by our damage, waiting for the finishing hit: (who, since, tries).
+static HELD: std::sync::Mutex<Option<(eldenring::cs::FieldInsHandle, std::time::Instant, u32)>> = std::sync::Mutex::new(None);
+
+/// Every frame: a finishing hit that missed (she dodged, jumped, was mid-move) is fired again until
+/// it lands - she sat at 2 HP until the player's next hit before (user). Gives up after 15 s or once
+/// she's no longer at 2 HP (1 = the phase change, more = healed / refilled, 0 = dead).
+pub fn tick_finisher() {
+    let Some((h, since, _)) = *HELD.lock().unwrap_or_else(|e| e.into_inner()) else { return };
+    let Some(w) = game::world() else { return };
+    let alive = w.chr_ins_by_handle_mut(&h).filter(|c| game::chr_ok(*c as *const _));
+    match alive {
+        Some(c) if c.modules.data.hp == 2 && since.elapsed().as_secs_f32() < 15.0 => malenia_finisher(c),
+        _ => *HELD.lock().unwrap_or_else(|e| e.into_inner()) = None,
+    }
+}
+
 pub fn apply(chr: &mut eldenring::cs::ChrIns, amount: f32) -> bool {
+    // A boss's body (phase 1) whose bar belongs to the next phase's character: like the game, the
+    // body takes the hit and the bar character loses exactly what the body lost. The body's own
+    // death starts the phase change (Godfrey -> Hoarah Loux, who holds the whole bar); the bar
+    // reaches 0 only with the last phase. Sending the damage only to the bar character killed
+    // Hoarah while Godfrey stood ("LEGEND FELLED", user 1.3).
+    if let Some(owner) = bar_owner(chr) {
+        static LOGGED: std::sync::Mutex<Vec<(i32, i32)>> = std::sync::Mutex::new(Vec::new());
+        let pair = (chr.npc_param_id as i32, owner.npc_param_id as i32);
+        if let Ok(mut l) = LOGGED.lock() {
+            if !l.contains(&pair) {
+                l.push(pair);
+                log::info!("damage to npc {} also comes off its boss bar's npc {} (entity {} -> {})", pair.0, pair.1, chr.event_entity_id, owner.event_entity_id);
+            }
+        }
+        let before = chr.modules.data.hp;
+        if before <= 0 {
+            return false;
+        }
+        let after = (before - amount.round().max(1.0) as i32).max(0);
+        chr.modules.data.hp = after;
+        let dealt = before - after;
+        let o = &mut owner.modules.data;
+        if o.hp > 0 {
+            // (the bar keeps at least 1 while a body is still standing: the game ends the fight)
+            o.hp = (o.hp - dealt).max(if after > 0 { 1 } else { 0 });
+        }
+        if after == 0 {
+            log::info!("boss body npc {} down (bar npc {} at {}): the game takes the next phase", chr.npc_param_id, owner.npc_param_id, owner.modules.data.hp);
+        }
+        return after == 0;
+    }
     let no_catch = NO_CATCH.load(std::sync::atomic::Ordering::Relaxed);
     let d = &mut chr.modules.data;
     if d.hp <= 0 {
         return false;
     }
     let before = d.hp;
+    // Malenia (npc 212000xx): the end of each phase must come from the game's own damage. Her
+    // phase-1 end is a real hit that leaves her at 1 HP (the game holds her there and plays the
+    // Goddess of Rot change); a plain HP write - 0 or 1 - skips it: 0 counts as killed for good, 1
+    // just leaves her fighting (user 1.3; tested 2026-10-22: a 14-damage game hit at 5 HP ->
+    // held at 1 -> change; the same hit in phase 2 -> real death and drop). So our damage stops
+    // her at 2 HP and fires one real ER hit (a dart with the Fire Pot's goods id, which makes
+    // the game deal damage) that finishes the phase the game's way. At exactly 1 HP she's in
+    // the change: no damage from us.
+    if chr.npc_param_id / 100 == 212000 {
+        if before == 1 {
+            return false;
+        }
+        let after = before - amount.round().max(1.0) as i32;
+        if after <= 1 {
+            chr.modules.data.hp = before.min(2);
+            malenia_finisher(chr);
+            return false;
+        }
+        chr.modules.data.hp = after;
+        return false;
+    }
+    let d = &mut chr.modules.data;
     d.hp = (d.hp - amount.round().max(1.0) as i32).max(0);
     // A caught enemy (below) is protected for the rest of that shot: the other shotgun pellets,
     // the rocket's blast after its direct hit, the ballista's second hit. The next shot kills.
@@ -276,4 +421,7 @@ pub struct Pending {
     /// Where it was fired from and its total flight time (remote detonation).
     pub origin: Vec3,
     pub total: f32,
+    /// The direct hit (target, amount), dealt when the projectile arrives - not on the trigger
+    /// pull (rockets hurt enemies before they visibly hit, user 1.3). Dropped on remote detonation.
+    pub direct: Option<(FieldInsHandle, f32)>,
 }
