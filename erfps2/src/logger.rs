@@ -37,13 +37,10 @@ pub fn set_panic_hook() {
             info.payload_as_str().unwrap_or("no panic message")
         );
 
+        // (file name only: the full build path showed the developer's folders to players)
         if let Some(location) = info.location() {
-            msg += &format!(
-                "\n    {}:{}:{}",
-                location.file(),
-                location.line(),
-                location.column()
-            );
+            let file = location.file().rsplit(['/', '\\']).next().unwrap_or(location.file());
+            msg += &format!("\n    {file}:{}:{}", location.line(), location.column());
         }
 
         log::error!("{msg}");

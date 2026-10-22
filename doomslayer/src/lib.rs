@@ -80,6 +80,27 @@ unsafe extern "system" fn DllMain(module: HINSTANCE, reason: u32, _: *mut c_void
         config::set_module(module.0 as usize);
         logger::init();
         logger::set_panic_hook();
+        // Wrong game version (a new ELDEN RING patch): one plain message, then the mod stays off
+        // and the game runs without it - it used to crash with a panic naming build paths. (On top:
+        // the game window covered it.)
+        if let Err(found) = rva::check_game() {
+            log::error!("unsupported game: {found} (this build: {})", rva::SUPPORTED_GAME);
+            let msg = format!(
+                "This version of DOOM RING needs {}.\nYour ELDEN RING is {found}.\n\nDOOM RING is turned off for this session; the game starts without it.\nGet the DOOM RING version for your game at github.com/stanleymov/DOOM-RING/releases",
+                rva::SUPPORTED_GAME
+            );
+            std::thread::spawn(move || {
+                use windows::{
+                    Win32::UI::WindowsAndMessaging::{MB_ICONWARNING, MB_SETFOREGROUND, MB_TOPMOST, MessageBoxW},
+                    core::{PCWSTR, w},
+                };
+                let wide: Vec<u16> = msg.encode_utf16().chain(std::iter::once(0)).collect();
+                unsafe {
+                    let _ = MessageBoxW(None, PCWSTR(wide.as_ptr()), w!("DOOM RING"), MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
+                }
+            });
+            return true.into();
+        }
         audio::init();
         audio::init_music();
         std::thread::spawn(main);

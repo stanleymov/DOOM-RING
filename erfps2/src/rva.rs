@@ -25,6 +25,15 @@ impl GameVersion for ERGameVersion {
     }
 }
 
+/// Is the running game a version this build has addresses for? Err(the game's version text).
+pub fn check_game() -> Result<(), String> {
+    match ERGameVersion::detect(&Program::current().into()) {
+        Ok(_) => Ok(()),
+        Err(fromsoftware_shared::DetectError::UnsupportedVersion(v)) => Err(format!("app version {v}")),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct Rva {
     ww: u32,

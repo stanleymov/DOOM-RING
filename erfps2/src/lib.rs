@@ -35,6 +35,12 @@ unsafe extern "system" fn DllMain(_: HINSTANCE, reason: u32, _: *mut c_void) -> 
         logger::init();
         logger::set_panic_hook();
 
+        // Wrong game version: stay off (doomslayer.dll shows the player the message).
+        if let Err(found) = rva::check_game() {
+            log::error!("unsupported game: {found} - erfps2 stays off");
+            return true.into();
+        }
+
         #[cfg(debug_assertions)]
         if libhotpatch::is_hotpatched() {
             return true.into();

@@ -26,6 +26,18 @@ impl GameVersion for ERGameVersion {
     }
 }
 
+/// The game version the mod was built for, for the version check's message.
+pub const SUPPORTED_GAME: &str = "ELDEN RING 1.17.2 (app version 2.7.2)";
+
+/// Is the running game a version this build has addresses for? Err(the game's version text).
+pub fn check_game() -> Result<(), String> {
+    match ERGameVersion::detect(&Program::current().into()) {
+        Ok(_) => Ok(()),
+        Err(fromsoftware_shared::DetectError::UnsupportedVersion(v)) => Err(format!("app version {v}")),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct Rva {
     ww: u32,

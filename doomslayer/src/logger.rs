@@ -25,8 +25,10 @@ pub fn set_panic_hook() {
             "doomslayer panicked: {}",
             info.payload_as_str().unwrap_or("no panic message")
         );
+        // (file name only: the full build path showed the developer's folders to players)
         if let Some(l) = info.location() {
-            msg += &format!("\n    {}:{}:{}", l.file(), l.line(), l.column());
+            let file = l.file().rsplit(['/', '\\']).next().unwrap_or(l.file());
+            msg += &format!("\n    {file}:{}:{}", l.line(), l.column());
         }
         log::error!("{msg}");
         log::logger().flush();
