@@ -66,6 +66,9 @@ pub fn trace(origin: Vec3, dir: Vec3, range: f32, radius: f32) -> Hit {
     match raycast::cast_sphere(origin, v, radius, FILTER, solid) {
         Some(h) => {
             let chr = if raycast::is_chr_hit(&h) { h.field_ins_handle() } else { None };
+            if let Some(c) = chr {
+                *LAST_HIT.lock().unwrap_or_else(|e| e.into_inner()) = Some((c, Vec3::from(h.pos), std::time::Instant::now()));
+            }
             let geom = h.field_ins_handle().filter(|f| {
                 chr.is_none() && matches!(f.selector.field_ins_type(), Some(FieldInsType::Geom | FieldInsType::HitGeom | FieldInsType::ReplayEnemy))
             });
@@ -92,9 +95,12 @@ pub fn is_prop(name: &str) -> bool {
 }
 
 /// Damage a character the player hit directly. Like ER's own weapons this hurts anyone but the
-/// player, co-op phantoms / spirit ashes (team 2) and allies (team 8); whoever is hit counts as
+/// player and the player's side (game::friendly_team); whoever is hit counts as
 /// hostile afterwards. Returns Some(killed) when it was a valid target.
 pub fn apply_handle(handle: FieldInsHandle, amount: f32) -> Option<bool> {
+    if game::player().is_some_and(|p| p.chr_ins.field_ins_handle == handle) {
+        return None;
+    }
     let Some(e) = game::enemies(400.0).into_iter().find(|e| e.chr.field_ins_handle == handle) else {
         // Not in the scan: ask the game for it directly (its own handle -> ChrSet lookup) and
         // say what it is, then hurt it anyway if it's a foe.
@@ -112,12 +118,12 @@ pub fn apply_handle(handle: FieldInsHandle, amount: f32) -> Option<bool> {
             d.hp,
             d.max_hp
         );
-        if matches!(chr.team_type, 1 | 2 | 8) {
+        if game::friendly_team(chr.team_type) {
             return None;
         }
         return Some(apply(chr, amount));
     };
-    if matches!(e.chr.team_type, 1 | 2 | 8) {
+    if game::friendly_team(e.chr.team_type) {
         log_no_damage(handle, Some(&e), "friendly team");
         return None;
     }
@@ -223,56 +229,178 @@ fn bar_owner(chr: &eldenring::cs::ChrIns) -> Option<&'static mut eldenring::cs::
     None
 }
 
-/// One real Elden Ring hit on Malenia (see apply): a dart spawned at her chest carrying the Fire
-/// Pot's goods id, which makes the game compute real damage (bullets without one deal 0). At most
-/// one every 0.3 s.
-fn malenia_finisher(chr: &eldenring::cs::ChrIns) {
-    use std::sync::Mutex;
-    use std::time::Instant;
-    static LAST: Mutex<Option<Instant>> = Mutex::new(None);
-    let mut last = LAST.lock().unwrap_or_else(|e| e.into_inner());
-    if last.is_some_and(|t| t.elapsed().as_secs_f32() < 0.3) {
-        return;
-    }
-    *last = Some(Instant::now());
-    let Some(p) = game::player() else { return };
-    let chest = game::chr_pos(chr) + Vec3::Y * 1.2;
-    let from = game::chr_pos(&p.chr_ins) + Vec3::Y * 1.2;
-    let dir = (chest - from).normalize_or(Vec3::X);
-    let r = crate::bullet::spawn_ex(Some(p.chr_ins.field_ins_handle), crate::params::FINISHER_BULLET, chest - dir * 0.4, dir, crate::params::FINISHER_GOODS);
-    let mut held = HELD.lock().unwrap_or_else(|e| e.into_inner());
-    let tries = match held.as_mut() {
-        Some((h, _, n)) if *h == chr.field_ins_handle => {
-            *n += 1;
-            *n
-        }
-        _ => {
-            *held = Some((chr.field_ins_handle, Instant::now(), 1));
-            1
-        }
-    };
-    if tries == 1 || tries % 10 == 0 {
-        log::info!("Malenia npc {} at {} HP: the game's own hit ends the phase (try {tries}, {r:?})", chr.npc_param_id, chr.modules.data.hp);
+/// The pot Old Albus hides in (Village of the Albinaurics): an asset in front of his body that
+/// says "unbreakable" (hp -1). Our shots stopped on it and never reached him; explosions broke it
+/// (the plasma rifle's heat blast - user). Shots break it too now, the way they break crates.
+pub fn is_albus_pot(name: &str) -> bool {
+    name.contains("AEG110_334_9000")
+}
+
+/// Characters whose end must come from the game's own damage: a plain HP write skips the game's
+/// rules for them.
+/// - Malenia (npc 212000xx): her phase-1 end is a real hit that leaves her at 1 HP (the game holds
+///   her there and plays the Goddess of Rot change). Our write 0 counted as killed for good, 1 just
+///   left her fighting (user 1.3; tested 2026-10-22: a 14-damage game hit at 5 HP -> held at 1 ->
+///   change; the same hit in phase 2 -> real death and drop).
+/// - The God-Devouring Serpent (npc 471000xx, Rykard's phase 1): same kind of hand-off - he never
+///   turned into Rykard and the arena stayed shut (player report, 1.3).
+/// - Old Albus (npc 367080xx), the pot in the Village of the Albinaurics: a real hit breaks his
+///   disguise so he can be talked to; killed by our write he dropped no Haligtree Secret Medallion
+///   and never spoke (player report, 1.3).
+#[derive(Clone, Copy, PartialEq)]
+enum RealFinish {
+    /// held at 1 HP by the game during the phase change: no damage from us then
+    PhaseBoss,
+    Albus,
+}
+
+/// A boss whose phases the game hands over itself (Malenia, Rykard's serpent): always a boss for the
+/// HUD and glory kills - the serpent's phase-1 bar belongs to another character, so it got a small
+/// Doom bar on top and could be offered a glory kill (user).
+pub fn phase_boss(chr: &eldenring::cs::ChrIns) -> bool {
+    real_finish(chr) == Some(RealFinish::PhaseBoss)
+}
+
+/// Held at 1 HP by the game: mid phase change, or the serpent left behind invisible once Rykard
+/// takes over - it was glory-killable forever, in the middle of the room (user).
+pub fn held_by_game(chr: &eldenring::cs::ChrIns) -> bool {
+    chr.modules.data.hp == 1 && phase_boss(chr)
+}
+
+fn real_finish(chr: &eldenring::cs::ChrIns) -> Option<RealFinish> {
+    match chr.npc_param_id / 100 {
+        212000 | 471000 => Some(RealFinish::PhaseBoss),
+        367080 => Some(RealFinish::Albus),
+        _ => None,
     }
 }
 
-/// Malenia held at 2 HP by our damage, waiting for the finishing hit: (who, since, tries).
-static HELD: std::sync::Mutex<Option<(eldenring::cs::FieldInsHandle, std::time::Instant, u32)>> = std::sync::Mutex::new(None);
+/// Our damage on a RealFinish character: it goes down to 2 HP, then one real Elden Ring hit (a dart
+/// carrying the Fire Pot's goods id: bullets without one deal 0) lands the last blow the game's way.
+/// Albus still in his pot (full HP) only gets the real hit.
+fn apply_real_finish(chr: &mut eldenring::cs::ChrIns, kind: RealFinish, amount: f32) -> bool {
+    let before = chr.modules.data.hp;
+    if before <= 0 || (kind == RealFinish::PhaseBoss && before == 1) {
+        return false;
+    }
+    if kind == RealFinish::Albus && before >= chr.modules.data.max_hp {
+        real_hit(chr);
+        return false;
+    }
+    let after = before - amount.round().max(1.0) as i32;
+    if after <= 1 {
+        chr.modules.data.hp = before.min(2);
+        real_hit(chr);
+    } else {
+        chr.modules.data.hp = after;
+    }
+    // (Albus: every hit, he only takes a few - his death went unseen in the log before)
+    if kind == RealFinish::Albus {
+        log::info!("Albus npc {}: {before} -> {} HP (hit {amount:.0})", chr.npc_param_id, chr.modules.data.hp);
+    }
+    false
+}
 
-/// Every frame: a finishing hit that missed (she dodged, jumped, was mid-move) is fired again until
-/// it lands - she sat at 2 HP until the player's next hit before (user). Gives up after 15 s or once
-/// she's no longer at 2 HP (1 = the phase change, more = healed / refilled, 0 = dead).
+/// A kill by glory kill / chainsaw / Crucible: RealFinish characters get the game's own last hit.
+pub fn kill(chr: &mut eldenring::cs::ChrIns) {
+    if let Some(kind) = real_finish(chr) {
+        apply_real_finish(chr, kind, 1e9);
+        return;
+    }
+    chr.modules.data.hp = 0;
+    if let Some(p) = game::player_type_of(chr) {
+        unsafe { p.player_game_data.as_mut() }.current_hp = 0;
+    }
+}
+
+/// Where a Doom shot last hit a character: (who, where, when). The real hit aims there.
+static LAST_HIT: std::sync::Mutex<Option<(FieldInsHandle, Vec3, std::time::Instant)>> = std::sync::Mutex::new(None);
+
+/// One real Elden Ring hit (see apply_real_finish), at most one per character every 0.3 s. Aimed at
+/// the spot the Doom shot hit; without one (blasts, retries) at the chest, or low on Albus' pot -
+/// a dart at chest height flew over the pot and never landed (1432/1432 HP after 20 tries).
+fn real_hit(chr: &eldenring::cs::ChrIns) {
+    use std::time::Instant;
+    let mut held = HELD.lock().unwrap_or_else(|e| e.into_inner());
+    held.retain(|(_, since, _, _)| since.elapsed().as_secs_f32() < 15.0);
+    let i = match held.iter().position(|(h, ..)| *h == chr.field_ins_handle) {
+        Some(i) => i,
+        None => {
+            held.push((chr.field_ins_handle, Instant::now(), None, 0));
+            held.len() - 1
+        }
+    };
+    let (_, _, last, tries) = &mut held[i];
+    if last.is_some_and(|t: Instant| t.elapsed().as_secs_f32() < 0.3) {
+        return;
+    }
+    *last = Some(Instant::now());
+    *tries += 1;
+    let tries = *tries;
+    drop(held);
+    let Some(p) = game::player() else { return };
+    let shot = (*LAST_HIT.lock().unwrap_or_else(|e| e.into_inner()))
+        .filter(|(h, _, at)| *h == chr.field_ins_handle && at.elapsed().as_secs_f32() < 1.0)
+        .map(|(_, pos, _)| pos);
+    let low = real_finish(chr) == Some(RealFinish::Albus);
+    let chest = shot.unwrap_or(game::chr_pos(chr) + Vec3::Y * if low { 0.4 } else { 1.2 });
+    let from = game::chr_pos(&p.chr_ins) + Vec3::Y * 1.2;
+    let dir = (chest - from).normalize_or(Vec3::X);
+    let r = crate::bullet::spawn_ex(Some(p.chr_ins.field_ins_handle), crate::params::FINISHER_BULLET, chest - dir * 0.4, dir, crate::params::FINISHER_GOODS);
+    if tries == 1 || tries % 10 == 0 {
+        log::info!(
+            "npc {} {:?} team {} at {}/{} HP: the game's own hit (try {tries}, {r:?}, aimed {} at {:.1} m up)",
+            chr.npc_param_id,
+            game::npc_name(chr.npc_param_id as i32),
+            chr.team_type,
+            chr.modules.data.hp,
+            chr.modules.data.max_hp,
+            if shot.is_some() { "at the shot" } else { "by height" },
+            chest.y - game::chr_pos(chr).y
+        );
+    }
+}
+
+/// Characters waiting for a real hit: (who, since, last hit, tries).
+static HELD: std::sync::Mutex<Vec<(eldenring::cs::FieldInsHandle, std::time::Instant, Option<std::time::Instant>, u32)>> = std::sync::Mutex::new(Vec::new());
+
+/// Every frame: a real hit that missed (she dodged, jumped, was mid-move) is fired again until it
+/// lands - Malenia sat at 2 HP until the player's next hit before (user). Gives up after 15 s or
+/// once the character has moved off its hold (1 = a phase change, more = healed / refilled, 0 =
+/// dead). Albus in his pot waits for the player's next shot.
 pub fn tick_finisher() {
-    let Some((h, since, _)) = *HELD.lock().unwrap_or_else(|e| e.into_inner()) else { return };
+    let handles: Vec<_> = HELD.lock().unwrap_or_else(|e| e.into_inner()).iter().map(|(h, since, ..)| (*h, *since)).collect();
+    if handles.is_empty() {
+        return;
+    }
     let Some(w) = game::world() else { return };
-    let alive = w.chr_ins_by_handle_mut(&h).filter(|c| game::chr_ok(*c as *const _));
-    match alive {
-        Some(c) if c.modules.data.hp == 2 && since.elapsed().as_secs_f32() < 15.0 => malenia_finisher(c),
-        _ => *HELD.lock().unwrap_or_else(|e| e.into_inner()) = None,
+    let mut done = Vec::new();
+    for (h, since) in handles {
+        match w.chr_ins_by_handle_mut(&h).filter(|c| game::chr_ok(*c as *const _)) {
+            Some(c) if matches!(c.modules.data.hp, 1..=2) && since.elapsed().as_secs_f32() < 15.0 => {
+                if !(c.modules.data.hp == 1 && real_finish(c) == Some(RealFinish::PhaseBoss)) {
+                    real_hit(c);
+                }
+            }
+            Some(c) if since.elapsed().as_secs_f32() < 15.0 && real_finish(c) == Some(RealFinish::Albus) => {}
+            _ => done.push(h),
+        }
+    }
+    if !done.is_empty() {
+        HELD.lock().unwrap_or_else(|e| e.into_inner()).retain(|(h, ..)| !done.contains(h));
     }
 }
 
 pub fn apply(chr: &mut eldenring::cs::ChrIns, amount: f32) -> bool {
+    if let Some(kind) = real_finish(chr) {
+        return apply_real_finish(chr, kind, amount);
+    }
+    // a body part of such a boss: the bar character takes it the same way (never written to 0)
+    if let Some(owner) = bar_owner(chr) {
+        if let Some(kind) = real_finish(owner) {
+            return apply_real_finish(owner, kind, amount);
+        }
+    }
     // A boss's body (phase 1) whose bar belongs to the next phase's character: like the game, the
     // body takes the hit and the bar character loses exactly what the body lost. The body's own
     // death starts the phase change (Godfrey -> Hoarah Loux, who holds the whole bar); the bar
@@ -310,27 +438,6 @@ pub fn apply(chr: &mut eldenring::cs::ChrIns, amount: f32) -> bool {
         return false;
     }
     let before = d.hp;
-    // Malenia (npc 212000xx): the end of each phase must come from the game's own damage. Her
-    // phase-1 end is a real hit that leaves her at 1 HP (the game holds her there and plays the
-    // Goddess of Rot change); a plain HP write - 0 or 1 - skips it: 0 counts as killed for good, 1
-    // just leaves her fighting (user 1.3; tested 2026-10-22: a 14-damage game hit at 5 HP ->
-    // held at 1 -> change; the same hit in phase 2 -> real death and drop). So our damage stops
-    // her at 2 HP and fires one real ER hit (a dart with the Fire Pot's goods id, which makes
-    // the game deal damage) that finishes the phase the game's way. At exactly 1 HP she's in
-    // the change: no damage from us.
-    if chr.npc_param_id / 100 == 212000 {
-        if before == 1 {
-            return false;
-        }
-        let after = before - amount.round().max(1.0) as i32;
-        if after <= 1 {
-            chr.modules.data.hp = before.min(2);
-            malenia_finisher(chr);
-            return false;
-        }
-        chr.modules.data.hp = after;
-        return false;
-    }
     let d = &mut chr.modules.data;
     d.hp = (d.hp - amount.round().max(1.0) as i32).max(0);
     // A caught enemy (below) is protected for the rest of that shot: the other shotgun pellets,

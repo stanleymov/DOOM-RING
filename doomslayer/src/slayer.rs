@@ -1154,7 +1154,7 @@ impl Slayer {
     fn is_boss(chr: &eldenring::cs::ChrIns) -> bool {
         let bosses = game::active_boss_handles();
         let direct = |c: &eldenring::cs::ChrIns| {
-            bosses.contains(&c.field_ins_handle) || params::is_area_boss(c.event_entity_id) || damage::boss_part(c)
+            bosses.contains(&c.field_ins_handle) || params::is_area_boss(c.event_entity_id) || damage::boss_part(c) || damage::phase_boss(c)
         };
         if direct(chr) {
             return true;
@@ -2903,6 +2903,9 @@ impl Slayer {
         let got = self.pickups.update(dt, me, game::camera(), self.cfg.pickup_magnet);
         self.collect(got);
 
+        for name in std::mem::take(&mut *crate::autoloot::KEY_ITEMS.lock().unwrap_or_else(|e| e.into_inner())) {
+            self.msg(name.to_uppercase());
+        }
         self.update_viewmodel(dt);
         game::hide_er_hud(self.cfg.hide_er_hud && self.in_world_for > 1.0);
     }
@@ -3004,6 +3007,11 @@ impl Slayer {
         if chainsaw {
             self.chainsaw_at = self.time;
             self.vm_play("fire", false);
+            // then the saw goes down and the gun is drawn (it popped back mid-clip - user); the
+            // out-of-ammo saw and the Crucible have their own hand-off
+            if !self.saw_mode && !self.crucible_out {
+                self.saw_drop = Some(self.time + 0.6);
+            }
         } else {
             // Execution: the fists come up with a jab during the lunge (the finisher plays on the kill).
             self.melee_clip = "punch_l2";
@@ -3099,7 +3107,7 @@ impl Slayer {
                 self.kills += 1;
             }
         } else {
-            chr.modules.data.hp = 0;
+            damage::kill(chr);
             self.kills += 1;
         }
         let _ = e;
@@ -3149,7 +3157,7 @@ impl Slayer {
         // Retried (after the cooldown) if a dart misses: only the asset's own state says it broke.
         // (loose physics props read state 4 while the physics moves them: any state goes)
         // (loose props are never plants, whatever their name: the white glowing skulls are AEG800)
-        if info.hp <= 0 || !(damage::is_prop(&info.name) || info.loose) || !(info.intact() || info.loose) || crate::hitter::pool_used() >= bullet::CAP_BREAK {
+        if (info.hp <= 0 && !damage::is_albus_pot(&info.name)) || !(damage::is_prop(&info.name) || info.loose) || !(info.intact() || info.loose) || crate::hitter::pool_used() >= bullet::CAP_BREAK {
             return false;
         }
         self.broken_at.insert(key, self.time);
@@ -3162,7 +3170,7 @@ impl Slayer {
         let back = if info.loose { 0.2 } else { 0.6 };
         let r = bullet::spawn(owner, params::BREAKER_BULLET, at - dir * back, dir);
         // fences ignore the dart: an explosion-shaped breaker at the hit point as well
-        if info.behavior == 0 {
+        if info.behavior == 0 || damage::is_albus_pot(&info.name) {
             let _ = bullet::spawn(owner, params::BREAKER_BLAST_BULLET, at - dir * 0.2, dir);
         }
         // Loose physics props take two hits (the first wakes the physics - in Elden Ring itself
@@ -3847,7 +3855,7 @@ impl Slayer {
         self.marked.retain(|h| enemies.iter().any(|e| e.chr.field_ins_handle == *h && e.dist < 60.0));
         for e in enemies.iter().filter(|e| is_hostile(e) && e.dist < 60.0) {
             // (a boss's body too: its HP is the top boss bar's - the Fire Giant showed both, user)
-            if active_bosses.contains(&e.chr.field_ins_handle) || damage::boss_part(e.chr) {
+            if active_bosses.contains(&e.chr.field_ins_handle) || damage::boss_part(e.chr) || damage::phase_boss(e.chr) {
                 continue;
             }
             let marked = self.marked.contains(&e.chr.field_ins_handle);
@@ -4392,7 +4400,7 @@ impl Slayer {
                         let _ = bullet::spawn_capped(bullet::CAP_FX, owner, params::FX_GORE_BULLET, from, chest - from);
                     }
                     log::info!("crucible: npc {} entity {} killed for {cost} charge(s), base HP {:.0}", e.chr.npc_param_id, e.chr.event_entity_id, e.max_hp() as f32 / crate::params::applied_hp_mult());
-                    chr.modules.data.hp = 0;
+                    damage::kill(chr);
                     self.kills += 1;
                     // no Doom loot, and its ER item drops give nothing (burning enemies still shed
                     // their armor shards through the burn tracker)
@@ -5348,7 +5356,16 @@ pub fn is_hostile(e: &Enemy) -> bool {
     static SEEN: [AtomicU64; 4] = [const { AtomicU64::new(0) }; 4];
     let t = e.chr.team_type as usize;
     // 11 is not friendly: the open-world dragon Agheel (npc 45000010) uses it.
-    let hostile = !matches!(t, 0 | 1 | 2 | 4 | 5 | 8 | 10 | 14) || damage::provoked(e.chr);
+    // Team 1 is no friend: the player isn't on this list, the NPCs on it are targets (Magnus, the
+    // Hornsent: player log, 1.3). While the player invades, everyone but the player's own team
+    // (game::friendly_team).
+    let me = game::player().map(|p| p.chr_ins.team_type as usize).unwrap_or(1);
+    static MY_TEAM: AtomicU64 = AtomicU64::new(1);
+    let was = MY_TEAM.swap(me as u64, Ordering::Relaxed);
+    if was != me as u64 {
+        log::info!("player team {was} -> {me}");
+    }
+    let hostile = if me != 1 { t != me && !matches!(t, 0 | 10 | 14) } else { !matches!(t, 0 | 2 | 4 | 5 | 8 | 10 | 14 | 47) } || damage::provoked(e.chr);
     let (word, bit) = (t / 64, 1u64 << (t % 64));
     if SEEN[word].fetch_or(bit, Ordering::Relaxed) & bit == 0 {
         log::info!("team {t} first seen (npc {}, hp {}): hostile {hostile}", e.chr.npc_param_id, e.chr.modules.data.max_hp);

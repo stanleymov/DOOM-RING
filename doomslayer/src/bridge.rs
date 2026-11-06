@@ -956,6 +956,54 @@ fn run(s: &mut Slayer, line: &str) -> String {
         }
         // graces <text>: graces whose place name contains <text> (row, discovered flag, lit?, name).
         // light <row>: mark that grace discovered, so it shows up for fast travel (test characters).
+        // give GOODS_ID [QTY]: put a goods item in the inventory (quest tests on a backed-up save).
+        // The game's own item-give (MapItemMan; signature from The Grand Archives' ItemGive).
+        "give" => {
+            use fromsoftware_shared::FromStatic;
+            let Some(id) = num(0).map(|v| v as u32) else { return "give GOODS_ID [QTY]".into() };
+            let qty = num(1).unwrap_or(1.0).max(1.0) as u32;
+            let Some(f) = crate::autoloot::scan_step(&crate::autoloot::parse_sig("8B 02 83 F8 0A"), 1) else { return "item give function not found".into() };
+            let Ok(man) = (unsafe { eldenring::cs::MapItemMan::instance() }) else { return "no MapItemMan".into() };
+            #[repr(C)]
+            struct Table {
+                count: u32,
+                item: [u32; 4],
+            }
+            let table = Table { count: 1, item: [0x4000_0000 | id, qty, u32::MAX, u32::MAX] };
+            let mut scratch = [0u8; 128];
+            let give: extern "C" fn(*const u8, *const Table, *mut u8, i32) = unsafe { std::mem::transmute(f.sub(0x52)) };
+            give(man as *const _ as *const u8, &table, scratch.as_mut_ptr(), 0);
+            log::info!("give goods {id} x{qty}");
+            format!("gave goods {id} x{qty}")
+        }
+        // teamrows T: every NpcParam row whose default team is T (count, then id + name), written
+        // to doomslayer_teamrows.txt - which characters a team change would touch
+        "teamrows" => {
+            use eldenring::cs::{NpcParam, SoloParamRepository};
+            use fromsoftware_shared::FromStatic;
+            let Some(team) = num(0).map(|v| v as u8) else { return "teamrows TEAM".into() };
+            let Ok(repo) = (unsafe { SoloParamRepository::instance() }) else { return "no params".into() };
+            let rows: Vec<String> = repo
+                .rows::<NpcParam>()
+                .filter(|(_, r)| r.team_type() == team)
+                .map(|(id, _)| format!("{id} {:?}", game::npc_name(id as i32)))
+                .collect();
+            let _ = std::fs::write(crate::config::mod_dir().join("doomslayer_teamrows.txt"), rows.join("
+"));
+            format!("team {team}: {} rows (doomslayer_teamrows.txt)", rows.len())
+        }
+        // flag ID [0|1]: read an event flag, or set it (quest-stage tests on a backed-up save)
+        "flag" => {
+            use eldenring::cs::CSEventFlagMan;
+            use fromsoftware_shared::FromStatic;
+            let Ok(flags) = (unsafe { CSEventFlagMan::instance_mut() }) else { return "no event flags".into() };
+            let Some(id) = num(0).map(|v| v as u32) else { return "flag ID [0|1]".into() };
+            if let Some(v) = num(1) {
+                flags.virtual_memory_flag.set_flag(id, v != 0.0);
+                log::info!("flag {id} set {}", v != 0.0);
+            }
+            format!("flag {id} = {}", flags.virtual_memory_flag.get_flag(id))
+        }
         "graces" | "light" => {
             use eldenring::cs::{BonfireWarpParam, CSEventFlagMan, MsgRepository, SoloParamRepository};
             use fromsoftware_shared::FromStatic;

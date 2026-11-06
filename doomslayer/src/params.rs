@@ -145,7 +145,7 @@ pub fn try_apply(cfg: &Config) -> bool {
     // ammo token or a health token; autoloot collects it and slayer.rs converts it to Doom
     // ammo/health. Vanilla enemy drops are replaced (user's choice).
     if cfg.doom_loot {
-        let friendly = |t: u8| matches!(t, 0 | 1 | 2 | 4 | 5 | 8 | 10 | 14);
+        let friendly = |t: u8| matches!(t, 0 | 1 | 2 | 4 | 5 | 8 | 10 | 14 | 47);
         let lot = repo
             .rows_mut::<NpcParam>()
             .find(|(_, r)| !friendly(r.team_type()) && r.item_lot_id_enemy() > 0)
@@ -176,7 +176,13 @@ pub fn try_apply(cfg: &Config) -> bool {
                 row.set_cumulate_num_flag_id(0);
             }
             let mut n = 0;
-            for (_, r) in repo.rows_mut::<NpcParam>() {
+            for (id, r) in repo.rows_mut::<NpcParam>() {
+                // Old Albus (367080xx): his own drop, untouched - his medallion is all he gives
+                // (user). (Lot 0 is no "nothing": it's a real lot - Neutralizing Boluses - and the
+                // medallion went missing with it.)
+                if id / 100 == 367080 {
+                    continue;
+                }
                 if !friendly(r.team_type()) && r.hp() > 1 {
                     r.set_item_lot_id_enemy(lot);
                     n += 1;

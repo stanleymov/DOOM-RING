@@ -28,6 +28,18 @@ pub fn player_type_of(chr: &ChrIns) -> Option<&'static mut PlayerIns> {
     w.player_chr_set.characters().find(|p| std::ptr::eq(&p.chr_ins, ptr))
 }
 
+/// On the player's side: co-op summons (team 2), allies (team 8) and spirit ashes (team 47 - the
+/// Lone Wolf Ashes were shot and glory-killed, user 2026-11-06; an old note had them on 2). Team 1 is not:
+/// the only friendly on it is the player, and the NPCs on it are targets - Magnus the Beast Claw
+/// (Volcano Manor) and the Hornsent at Enir-Ilim took no damage at all (player log, 1.3). While the
+/// player is the invader, only the player's own team.
+pub fn friendly_team(t: u8) -> bool {
+    match player().map(|p| p.chr_ins.team_type) {
+        Some(me) if me != 1 => t == me,
+        _ => matches!(t, 2 | 8 | 47),
+    }
+}
+
 pub fn player() -> Option<&'static mut PlayerIns> {
     let w = world()?;
     let p = w.main_player.as_mut()?;
@@ -287,7 +299,7 @@ fn enemies_inner(max_dist: f32) -> Vec<Enemy> {
             continue;
         }
         let chr = unsafe { &mut *ptr };
-        if chr.team_type == 1 {
+        if crate::damage::held_by_game(chr) {
             continue;
         }
         let data = &chr.modules.data;
