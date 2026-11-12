@@ -197,6 +197,9 @@ pub struct Slayer {
     glory_hold: Option<(Vec3, f32)>,
     /// Riding a moving map object (lift) until this time: the game moves us, ours stays out.
     lift_until: f32,
+    lift_trace_at: f32,
+    /// last "dash: no floor" log line (rate limit)
+    dash_nofloor_log: f32,
     /// After a landing the camera rides the body directly until this time (land_cam_time).
     cam_land_until: f32,
     /// Doom landing dip: (start time, depth m)
@@ -679,6 +682,8 @@ impl Slayer {
             fire_lock: false,
             glory_hold: None,
             lift_until: -1.0,
+            lift_trace_at: -1.0,
+            dash_nofloor_log: -1.0,
             cam_land_until: -1.0,
             land_dip: None,
             air_vy_meas: 0.0,
@@ -4575,6 +4580,16 @@ impl Slayer {
             if let Some((h, _)) = self.glory_hold.as_mut() {
                 *h += shift;
             }
+            // The fall-through rescue's last safe spot and the lift floor sample too: riding a lift
+            // over a section edge read as a 28 m drop under a roof and "restored" the player 28 m
+            // up inside a building (user + player report 1.4: "superjump through the roof").
+            if let Some((s, _)) = self.last_safe.as_mut() {
+                *s += shift;
+            }
+            if let Some((_, at, gy)) = self.lift_floor.as_mut() {
+                *at += shift;
+                *gy += shift.y;
+            }
         }
         // (a section change during a glory kill, for the log)
         if self.glory.is_some() || self.time < self.glory_log_until {
@@ -4649,6 +4664,25 @@ impl Slayer {
                 }
             }
             self.lift_floor = floor(pos).map(|(k, gy, _)| (k, pos, gy));
+            // Lift trace (player report 1.4: falling through standing still / looking up, a
+            // superjump through the roof when jumping): 4 times a second on a lift, what holds us up.
+            if self.time < self.lift_until && self.time - self.lift_trace_at >= 0.25 {
+                self.lift_trace_at = self.time;
+                let under = floor(pos).map(|(_, gy, _)| gy);
+                let pitch = game::camera().map(|(_, f)| f.y.asin().to_degrees()).unwrap_or(0.0);
+                log::info!(
+                    "lift trace: y {:.3} floor {} ground {} mult {:.2} air_vy {:?} jump_grace {:.2} idle {} pitch {:+.0} vel_y {:.2}",
+                    pos.y,
+                    under.map_or("none".to_string(), |g| format!("{g:.3} (gap {:+.3})", pos.y - g)),
+                    ph.is_touching_ground,
+                    ph.motion_multiplier,
+                    self.air_vy.map(|v| (v * 100.0).round() / 100.0),
+                    self.jump_grace,
+                    self.wish_dir() == Vec3::ZERO,
+                    pitch,
+                    self.air_vy_meas
+                );
+            }
         }
         // Fell through the floor (position writes can push the capsule into geometry): if we're
         // dropping and there is a floor *above* us right where we were standing a moment ago,
@@ -4712,8 +4746,18 @@ impl Slayer {
             delta += mv;
             // Dashing on the ground follows it (uphill dashes used to push into the slope).
             if ph.is_touching_ground && self.air_vy.is_none() {
-                if let Some(gy) = ground_height(pos + Vec3::new(mv.x, 0.0, mv.z), 0.9) {
-                    delta.y += gy - pos.y;
+                let to = pos + Vec3::new(mv.x, 0.0, mv.z);
+                match ground_height(to, 0.9) {
+                    Some(gy) => delta.y += gy - pos.y,
+                    // (player report: dashing in a small lift drops you through it - the game
+                    // says ground, our probe finds none there: what is under us?)
+                    None if self.time - self.dash_nofloor_log > 0.5 => {
+                        self.dash_nofloor_log = self.time;
+                        let under = raycast::cast_sphere(pos + Vec3::Y * 0.6, Vec3::NEG_Y * 2.0, 0.25, 0xffff_ffff, |h| !raycast::is_chr_hit(h))
+                            .map(|h| format!("{:?} {:?} {:.2} m down", h.field_ins_handle().and_then(|f| f.selector.field_ins_type()), h.field_ins_handle().and_then(|f| game::geom_by_handle(&f)).map(|g| g.name), h.segment * 2.0 - 0.6));
+                        log::info!("dash: no floor found ahead at {to} (game says ground; under us: {under:?}; lift {})", self.time < self.lift_until);
+                    }
+                    None => {}
                 }
             }
         }
