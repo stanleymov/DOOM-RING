@@ -364,6 +364,11 @@ pub struct Config {
     pub vm_debug: u32,
     /// Weapon anti-aliasing: MSAA sample count for the gun pass (0/1 = off, 2, 4, 8). Live.
     pub vm_msaa: u32,
+    /// Weapon / arm texture size in pixels (largest side): 2560 high, 2048 medium, 1024 low; 0 =
+    /// pick from the graphics card's video memory. All the guns' textures sit in video memory: at
+    /// 2560 that's ~4.5 GB, more than a 4 GB card has (GTX 1050 Ti: invisible hands, then an
+    /// NVIDIA driver crash - player report 1.4.1). Read at start-up.
+    pub vm_tex_size: u32,
     /// Weapon anti-aliasing: FXAA-style edge smoothing over the gun's pixels only. Live.
     pub vm_fxaa: bool,
 }
@@ -492,6 +497,7 @@ impl Default for Config {
             doom_bob_rot: [1.0; 3],
             vm_debug: 0,
             vm_msaa: 4,
+            vm_tex_size: 0,
             vm_fxaa: false,
             // User: rocket launcher and plasma rifle a bit closer, combat shotgun a bit further.
             gun_offset: [

@@ -62,6 +62,11 @@ class Wizard(tk.Tk):
         self.updating = False
         self.space = self.found = None
         self.target.trace_add("write", lambda *_: self.update_space())
+        # weapon texture size (texture page): the graphics card's video memory decides the recommendation
+        self.gpu = engine.gpu_memory()
+        self.tex_rec = engine.recommended_tex_size(self.gpu[1] if self.gpu else 0)
+        self.tex_size = tk.IntVar(value=self.tex_rec)
+        self.tex_picked = False
 
         self.body = ttk.Frame(self, padding=(28, 22, 28, 8))
         self.body.pack(fill="both", expand=True)
@@ -73,7 +78,8 @@ class Wizard(tk.Tk):
         self.cancel_btn.pack(side="right")
         self.next_btn.pack(side="right", padx=(0, 10))
         self.back_btn.pack(side="right", padx=(0, 10))
-        self.pages = [self.page_welcome, self.page_games, self.page_location, self.page_install, self.page_done]
+        self.pages = [self.page_welcome, self.page_games, self.page_location, self.page_textures, self.page_install,
+                      self.page_done]
         self.page = 0
         self.protocol("WM_DELETE_WINDOW", self.cancel)
         self.show()
@@ -109,6 +115,33 @@ class Wizard(tk.Tk):
         draw()
         return row
 
+    def radio(self, parent, text, var, value, note=""):
+        """A radio button drawn like the check boxes (ttk's dark theme draws them badly)."""
+        row = ttk.Frame(parent)
+        dot = tk.Canvas(row, width=20, height=20, bg=BG, highlightthickness=0, cursor="hand2")
+        dot.pack(side="left")
+        lab = ttk.Label(row, text=text, cursor="hand2")
+        lab.pack(side="left", padx=(8, 0))
+        if note:
+            ttk.Label(row, text=note, style="Dim.TLabel").pack(side="left", padx=(8, 0))
+
+        def draw(*_):
+            dot.delete("all")
+            on = var.get() == value
+            dot.create_oval(2, 2, 18, 18, outline=RED if on else DIM, width=2, fill=PANEL)
+            if on:
+                dot.create_oval(6, 6, 14, 14, outline=RED, fill=RED)
+
+        def pick(_e=None):
+            var.set(value)
+            self.tex_picked = True
+
+        dot.bind("<Button-1>", pick)
+        lab.bind("<Button-1>", pick)
+        var.trace_add("write", draw)
+        draw()
+        return row
+
     # ------------------------------------------------------------------ navigation
     def clear(self):
         for w in self.body.winfo_children():
@@ -116,7 +149,7 @@ class Wizard(tk.Tk):
 
     def show(self):
         self.clear()
-        self.back_btn.state(["!disabled"] if 0 < self.page < 3 else ["disabled"])
+        self.back_btn.state(["!disabled"] if 0 < self.page < 4 else ["disabled"])
         self.next_btn.state(["!disabled"])
         self.next_btn.configure(text="Next >")
         self.pages[self.page]()
@@ -137,7 +170,7 @@ class Wizard(tk.Tk):
             self.show()
 
     def cancel(self):
-        if self.installer and self.page == 3:
+        if self.installer and self.page == 4:
             if not messagebox.askyesno("DOOM RING Setup", "Stop the setup? The mod will not be complete."):
                 return
             self.installer.cancel()
@@ -264,7 +297,7 @@ class Wizard(tk.Tk):
         self.updating = bool(old)
         if not old:
             self.found.configure(text="")
-            self.next_btn.configure(text="Install")
+            self.next_btn.configure(text="Next >")
             return
         if old == self.version:
             what = f"DOOM RING Version {old} is already installed here - Update puts its mod files back as new."
@@ -273,7 +306,7 @@ class Wizard(tk.Tk):
         what += (" Your settings, keys and progress are kept." + (" This takes a few seconds." if quick else
                  " The DOOM content is rebuilt too (5 - 20 minutes)."))
         self.found.configure(text="✔ " + what)
-        self.next_btn.configure(text="Update")
+        self.next_btn.configure(text="Next >")
 
     def location_ok(self):
         t = Path(self.target.get())
@@ -311,6 +344,32 @@ class Wizard(tk.Tk):
             return False
         return True
 
+    def page_textures(self):
+        ttk.Label(self.body, text="Weapon texture quality", style="Title.TLabel").pack(anchor="w", pady=(0, 12))
+        found = ttk.Frame(self.body, style="Panel.TFrame", padding=14)
+        found.pack(fill="x", pady=(0, 12))
+        if self.gpu:
+            card = f"{self.gpu[0]}, {self.gpu[1] / 2**30:.0f} GB video memory"
+        else:
+            card = "the setup couldn't read your graphics card's video memory"
+        ttk.Label(found, text="Your graphics card", style="Panel.TLabel", font=("Segoe UI", 10, "bold"),
+                  foreground=DIM).pack(anchor="w")
+        ttk.Label(found, text=card, style="Panel.TLabel", wraplength=660, justify="left").pack(anchor="w", pady=(4, 0))
+        self.text(self.body, ("The guns' and arms' textures have to fit in your graphics card's video memory next to "
+                              "ELDEN RING. A setting that's too high for your card can crash the game or leave the "
+                              "Doom Slayer's hands invisible."), pady=(0, 12))
+        # an update keeps the player's own choice (unless they pick another one here)
+        if self.updating and not self.tex_picked:
+            old = engine.installed_tex_size(self.target.get())
+            if old in [px for _, px, _ in engine.TEX_SIZES]:
+                self.tex_size.set(old)
+        for name, px, mem in engine.TEX_SIZES:
+            label = f"{name}  ({px} px)" + ("  (recommended)" if px == self.tex_rec else "")
+            self.radio(self.body, label, self.tex_size, px, f"for {mem}").pack(anchor="w", pady=3)
+        self.text(self.body, "You can change it later in game/natives/doomslayer.toml (vm_tex_size).",
+                  style="Dim.TLabel", pady=(12, 0))
+        self.next_btn.configure(text="Update" if self.updating else "Install")
+
     def page_install(self):
         ttk.Label(self.body, text="Updating DOOM RING" if self.updating else "Building DOOM RING", style="Title.TLabel").pack(anchor="w", pady=(0, 10))
         self.step_lbl = self.text(self.body, "Starting...")
@@ -331,6 +390,7 @@ class Wizard(tk.Tk):
         self.installer = engine.Installer(self.doom_path, self.target.get(),
                                           on_progress=lambda f, s: self.after(0, self.progress, f, s),
                                           on_log=lambda line: self.after(0, self.add_log, line))
+        self.installer.tex_size = self.tex_size.get()
         engine.start_thread(self.run_install)
 
     def progress(self, frac, step):

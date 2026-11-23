@@ -41,7 +41,46 @@ const BONES_BYTES: usize = MAX_BONES * 48;
 const FX_BYTES: usize = 96 * 1024;
 const SLOT_BYTES: usize = 256 + 2 * ((BONES_BYTES + 255) & !255) + FX_BYTES;
 const SRV_CAPACITY: u32 = 4096;
-const MAX_TEX: u32 = 2560;
+/// Texture size cap (largest side, px): vm_tex_size, or picked from the graphics card's video
+/// memory (config.rs vm_tex_size). Decided once.
+fn max_tex() -> u32 {
+    static CAP: std::sync::OnceLock<u32> = std::sync::OnceLock::new();
+    *CAP.get_or_init(|| {
+        let set = config::get_cached().vm_tex_size;
+        let (name, vram) = gpu_memory().unwrap_or_else(|| ("unknown".into(), 0));
+        let gb = vram as f64 / (1u64 << 30) as f64;
+        let cap = match set {
+            0 if vram == 0 => 2048,
+            0 if gb >= 7.5 => 2560,
+            0 if gb >= 5.5 => 2048,
+            0 => 1024,
+            s => s.clamp(256, 4096),
+        };
+        log::info!("graphics card: {name}, {gb:.1} GB video memory -> weapon textures {cap} px ({})", if set == 0 { "auto" } else { "vm_tex_size" });
+        cap
+    })
+}
+
+/// The graphics card with the most dedicated video memory (the one ELDEN RING runs on; laptops
+/// list the built-in GPU too): (name, bytes).
+fn gpu_memory() -> Option<(String, u64)> {
+    use windows::Win32::Graphics::Dxgi::{CreateDXGIFactory1, DXGI_ADAPTER_FLAG_SOFTWARE, IDXGIFactory1};
+    let factory: IDXGIFactory1 = unsafe { CreateDXGIFactory1() }.ok()?;
+    let mut best: Option<(String, u64)> = None;
+    for i in 0.. {
+        let Ok(a) = (unsafe { factory.EnumAdapters1(i) }) else { break };
+        let Ok(d) = (unsafe { a.GetDesc1() }) else { continue };
+        if d.Flags & DXGI_ADAPTER_FLAG_SOFTWARE.0 as u32 != 0 {
+            continue;
+        }
+        let mem = d.DedicatedVideoMemory as u64;
+        if best.as_ref().is_none_or(|(_, m)| mem > *m) {
+            let n = d.Description.iter().position(|&c| c == 0).unwrap_or(d.Description.len());
+            best = Some((String::from_utf16_lossy(&d.Description[..n]), mem));
+        }
+    }
+    best
+}
 
 // ------------------------------------------------------------------------- CPU-side data
 
@@ -143,7 +182,7 @@ fn parse_model(path: &Path) -> Option<ModelData> {
     Some(ModelData { arms_bones, gun_bones, meshes, clips, arm_side })
 }
 
-/// RGBA8 image with a CPU-built mip chain, capped at MAX_TEX.
+/// RGBA8 image with a CPU-built mip chain, capped at max_tex().
 struct Image {
     w: u32,
     h: u32,
@@ -255,12 +294,13 @@ fn decode_png(path: &Path) -> Option<Image> {
         _ => return None,
     };
     let mut img = Image { w, h, mips: vec![rgba] };
-    while img.w >= MAX_TEX * 2 || img.h >= MAX_TEX * 2 {
+    let max_tex = max_tex();
+    while img.w >= max_tex * 2 || img.h >= max_tex * 2 {
         img = downsample(&img);
         img.mips.truncate(1);
     }
-    if img.w > MAX_TEX || img.h > MAX_TEX {
-        let k = MAX_TEX as f32 / img.w.max(img.h) as f32;
+    if img.w > max_tex || img.h > max_tex {
+        let k = max_tex as f32 / img.w.max(img.h) as f32;
         img = resample(&img, ((img.w as f32 * k).round() as u32).max(1), ((img.h as f32 * k).round() as u32).max(1));
     }
     let (mut cw, mut ch) = (img.w, img.h);
@@ -1566,9 +1606,19 @@ impl Gpu {
                         }
                         let img = DECODED.lock().ok().and_then(|mut g| g.as_mut().and_then(|m| m.remove(&path))).or_else(|| decode_png(&path).map(std::sync::Arc::new));
                         if let Some(img) = img {
-                            if let Ok(p) = unsafe { prepare_texture(&dev.0, &img) } {
-                                if let Ok(mut g) = PREPARED.lock() {
-                                    g.push((path, p));
+                            match unsafe { prepare_texture(&dev.0, &img) } {
+                                Ok(p) => {
+                                    if let Ok(mut g) = PREPARED.lock() {
+                                        g.push((path, p));
+                                    }
+                                }
+                                // (failures were skipped silently: out of video memory showed up
+                                // only as invisible hands - player report 1.4.1)
+                                Err(e) => {
+                                    static N: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+                                    if N.fetch_add(1, std::sync::atomic::Ordering::Relaxed) < 5 {
+                                        log::error!("viewmodel texture {} ({}x{}) could not be created: {e:?} - out of video memory? (vm_tex_size)", path.display(), img.w, img.h);
+                                    }
                                 }
                             }
                         }

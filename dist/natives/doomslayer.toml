@@ -65,6 +65,7 @@ vm_env = 0.35
 vm_arms = true
 vm_debug = 0
 vm_msaa = 4                   # gun anti-aliasing: 0 off, 2, 4, 8 (live)
+vm_tex_size = 0               # weapon textures: 0 auto (from video memory), 2560 high, 2048 medium, 1024 low (restart)
 vm_fxaa = false                # gun edge smoothing (FXAA), live; false = off
 sway = [5.0, 0.004, 0.005, 0.011]  # weapon sway (live): tilt deg, trail m, jump lift m, landing dip m; 0 = off
 bob = [0.2, 0.2, 1.0]   # walking bob (live): height, sideways, speed; 1 = old quarter-of-Doom bob

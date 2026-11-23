@@ -175,6 +175,80 @@ class Cancelled(Exception):
     pass
 
 
+# ------------------------------------------------------------------------------------- graphics card
+# Weapon texture sizes (vm_tex_size in doomslayer.toml): the guns' and arms' textures all sit in video
+# memory - ~4.5 GB at 2560 px, more than a 4 GB card has (GTX 1050 Ti: driver crash, invisible hands,
+# player report 1.4.1).
+TEX_SIZES = [("High", 2560, "8 GB or more"), ("Medium", 2048, "6 GB"), ("Low", 1024, "4 GB or less")]
+
+
+def gpu_memory():
+    """(name, bytes) of the graphics card with the most video memory, from the display adapters'
+    registry keys (64-bit size: WMI's AdapterRAM stops at 4 GB), or None."""
+    try:
+        import winreg
+    except ImportError:
+        return None
+    best = None
+    path = r"SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+    try:
+        root = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path)
+    except OSError:
+        return None
+    for i in range(64):
+        try:
+            sub = winreg.EnumKey(root, i)
+        except OSError:
+            break
+        try:
+            with winreg.OpenKey(root, sub) as k:
+                name = winreg.QueryValueEx(k, "DriverDesc")[0]
+                try:
+                    mem = int(winreg.QueryValueEx(k, "HardwareInformation.qwMemorySize")[0])
+                except OSError:
+                    raw = winreg.QueryValueEx(k, "HardwareInformation.MemorySize")[0]
+                    mem = int.from_bytes(raw[:8], "little") if isinstance(raw, bytes) else int(raw)
+        except (OSError, ValueError, TypeError):
+            continue
+        if mem > 0 and (best is None or mem > best[1]):
+            best = (str(name), mem)
+    return best
+
+
+def recommended_tex_size(mem):
+    """The texture size for that much video memory (the mod's own auto choice, viewmodel.rs)."""
+    if not mem:
+        return 2048
+    gb = mem / 2**30
+    return 2560 if gb >= 7.5 else 2048 if gb >= 5.5 else 1024
+
+
+def installed_tex_size(target):
+    """vm_tex_size in an existing install's doomslayer.toml (0 = automatic / not set), or None."""
+    try:
+        s = (Path(target) / "game" / "natives" / "doomslayer.toml").read_text(encoding="utf-8")
+    except OSError:
+        return None
+    m = re.search(r"(?m)^vm_tex_size\s*=\s*(\d+)", s)
+    return int(m.group(1)) if m else 0
+
+
+def set_tex_size(target, px):
+    """Write vm_tex_size into the install's doomslayer.toml (a line added under vm_msaa if missing)."""
+    f = Path(target) / "game" / "natives" / "doomslayer.toml"
+    s = f.read_text(encoding="utf-8")
+    NL = chr(10)
+    line = (f"vm_tex_size = {px}" + " " * max(1, 30 - len(f"vm_tex_size = {px}")) +
+            "# weapon textures: 0 auto (from video memory), 2560 high, 2048 medium, 1024 low (restart)")
+    if re.search(r"(?m)^vm_tex_size\s*=", s):
+        s = re.sub(r"(?m)^vm_tex_size\s*=.*$", line, s)
+    elif re.search(r"(?m)^vm_msaa\s*=.*$", s):
+        s = re.sub(r"(?m)^(vm_msaa\s*=.*)$", lambda m: m.group(1) + NL + line, s, count=1)
+    else:
+        s = s.rstrip(NL) + NL + line + NL
+    f.write_text(s, encoding="utf-8")
+
+
 class Installer:
     """Runs the steps in a thread; `on_progress(fraction, step text)` and `on_log(line)` are called
     from that thread (the GUI marshals them)."""
@@ -198,6 +272,8 @@ class Installer:
         self.workers = workers or max(1, min(4, (os.cpu_count() or 2) // 2))
         self.log_file = None
         self.ffmpeg = None
+        # weapon texture size picked on the setup's texture page (None: leave the settings alone)
+        self.tex_size = None
         self._base, self._span = 0.0, 0.0
 
     # -- helpers
@@ -301,6 +377,9 @@ class Installer:
         for rel in OBSOLETE:
             (self.target / rel).unlink(missing_ok=True)
         self.log(f"mod files -> {self.target}")
+        if self.tex_size is not None:
+            set_tex_size(self.target, self.tex_size)
+            self.log(f"weapon textures: {self.tex_size} px")
 
     def get_ffmpeg(self):
         """ffmpeg for the audio steps: bundled, on the PC already, or downloaded once (~130 MB)."""
